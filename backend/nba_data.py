@@ -25,6 +25,18 @@ NBA_TO_ESPN_ABBR: Dict[int, str] = {
 
 ESPN_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
 
+# stats.nba.com requires these headers or it returns 403/empty from cloud IPs
+NBA_HEADERS = {
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Host": "stats.nba.com",
+    "Origin": "https://www.nba.com",
+    "Referer": "https://www.nba.com/",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "x-nba-stats-origin": "stats",
+    "x-nba-stats-token": "true",
+}
+
 _cache: Dict[str, tuple] = {}
 
 
@@ -50,6 +62,8 @@ def get_standings() -> List[Dict]:
             season=CURRENT_SEASON,
             season_type="Regular Season",
             league_id="00",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         df = resp.get_data_frames()[0]
         result = []
@@ -87,6 +101,8 @@ def get_advanced_stats() -> Dict[int, Dict]:
             season_type_all_star="Regular Season",
             measure_type_detailed_defense="Advanced",
             per_mode_detailed="PerGame",
+            headers=NBA_HEADERS,
+            timeout=30,
         )
         df = resp.get_data_frames()[0]
         result = {}
@@ -116,7 +132,7 @@ def get_today_games(date_str: str = None) -> List[Dict]:
         return cached
 
     try:
-        resp = scoreboardv2.ScoreboardV2(game_date=date_str, league_id="00")
+        resp = scoreboardv2.ScoreboardV2(game_date=date_str, league_id="00", headers=NBA_HEADERS, timeout=30)
         games_df = resp.game_header.get_data_frame()
         linescore_df = resp.line_score.get_data_frame()
 
