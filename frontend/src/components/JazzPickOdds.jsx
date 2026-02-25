@@ -304,6 +304,16 @@ export default function JazzPickOdds({ data, loading, error }) {
                 </div>
                 <div style={{ width: 40, flexShrink: 0 }} />
               </div>
+              {(pick === 9 || pick === 10) && (
+                <div className="flex items-center gap-2">
+                  <div style={{ width: 22, flexShrink: 0 }} />
+                  <div style={{ width: 24, flexShrink: 0 }} />
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--text-muted)' }}>
+                    → OKC
+                  </span>
+                </div>
+              )}
             </div>
           )
         })}
@@ -344,6 +354,12 @@ export default function JazzPickOdds({ data, loading, error }) {
               <div className="mt-1.5 text-sm font-bold tabular-nums" style={{ color: 'var(--text)' }}>
                 #{pick}
               </div>
+              {(pick === 9 || pick === 10) && (
+                <div className="mt-1 text-[9px] font-bold px-1 py-0.5 rounded text-center"
+                  style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--text-muted)', lineHeight: 1.2 }}>
+                  → OKC
+                </div>
+              )}
             </div>
           ))}
         </div>
