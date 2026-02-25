@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { apiUrl } from './lib/api'
 import TankTable from './components/TankTable'
 import TodayGames from './components/TodayGames'
@@ -163,6 +164,15 @@ export default function App() {
           <JazzPickOdds data={jazzOdds.data} loading={jazzOdds.loading} error={jazzOdds.error} />
         </section>
       </main>
+
+      <footer className="max-w-[1600px] mx-auto px-4 py-6 flex justify-end">
+        <Link to="/style-guide" className="text-xs" style={{ color: 'var(--border-med)', textDecoration: 'none' }}
+          onMouseEnter={e => e.target.style.color = 'var(--text-faint)'}
+          onMouseLeave={e => e.target.style.color = 'var(--border-med)'}
+        >
+          style guide
+        </Link>
+      </footer>
     </div>
   )
 }
