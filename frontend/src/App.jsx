@@ -166,7 +166,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="hidden sm:flex max-w-[1600px] mx-auto px-4 py-6 justify-end">
+      <footer className="hidden max-w-[1600px] mx-auto px-4 py-6 justify-end">
         <Link to="/style-guide" className="text-xs" style={{ color: 'var(--border-med)', textDecoration: 'none' }}
           onMouseEnter={e => e.target.style.color = 'var(--text-faint)'}
           onMouseLeave={e => e.target.style.color = 'var(--border-med)'}

@@ -444,7 +444,9 @@ function BarColumn({ pick, pct, barH, color, isLotteryPick, delay, draftHistory 
 
 function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
   const [order, setOrder] = useState([...initialOrder])
+  const [draggingIdx, setDraggingIdx] = useState(null)
   const dragIdx = useRef(null)
+  const listRef = useRef(null)
 
   useEffect(() => {
     const handler = e => { if (e.key === 'Escape') onClose() }
@@ -452,14 +454,40 @@ function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  function handleDragStart(i) {
-    dragIdx.current = i
-  }
+  // Non-passive touchmove so we can call preventDefault and block scroll while dragging
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return
+    function onTouchMove(e) {
+      if (dragIdx.current === null) return
+      e.preventDefault()
+      const touch = e.touches[0]
+      const target = document.elementFromPoint(touch.clientX, touch.clientY)
+      const row = target?.closest('[data-row-idx]')
+      if (!row) return
+      const targetIdx = parseInt(row.dataset.rowIdx, 10)
+      if (isNaN(targetIdx) || targetIdx === dragIdx.current) return
+      const src = dragIdx.current
+      dragIdx.current = targetIdx
+      setDraggingIdx(targetIdx)
+      setOrder(prev => {
+        const next = [...prev]
+        const [moved] = next.splice(src, 1)
+        next.splice(targetIdx, 0, moved)
+        return next
+      })
+    }
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onTouchMove)
+  }, [])
 
+  // Mouse drag handlers
+  function handleDragStart(i) { dragIdx.current = i; setDraggingIdx(i) }
   function handleDragEnter(i) {
     if (dragIdx.current === null || dragIdx.current === i) return
     const src = dragIdx.current
     dragIdx.current = i
+    setDraggingIdx(i)
     setOrder(prev => {
       const next = [...prev]
       const [moved] = next.splice(src, 1)
@@ -467,10 +495,11 @@ function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
       return next
     })
   }
+  function handleDragEnd() { dragIdx.current = null; setDraggingIdx(null) }
 
-  function handleDragEnd() {
-    dragIdx.current = null
-  }
+  // Touch drag handlers — only triggered from the drag handle
+  function handleTouchStart(i) { dragIdx.current = i; setDraggingIdx(i) }
+  function handleTouchEnd() { dragIdx.current = null; setDraggingIdx(null) }
 
   return createPortal(
     <>
@@ -497,15 +526,16 @@ function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
         {/* Sub-header */}
         <div style={{ padding: '6px 16px', background: 'var(--bg-raised)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <span style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Drag to reorder · First 10 shown in chart
+            Drag handle to reorder · First 10 shown in chart
           </span>
         </div>
 
         {/* List */}
-        <div style={{ overflowY: 'auto', flex: 1 }}>
+        <div ref={listRef} style={{ overflowY: 'auto', flex: 1 }}>
           {order.map((player, i) => (
             <div
               key={player?.rank ?? i}
+              data-row-idx={i}
               draggable
               onDragStart={() => handleDragStart(i)}
               onDragEnter={() => handleDragEnter(i)}
@@ -515,9 +545,10 @@ function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '8px 16px',
                 borderBottom: '1px solid var(--border)',
-                cursor: 'grab',
                 background: i >= 10 ? 'var(--bg-raised)' : '#fff',
                 userSelect: 'none',
+                opacity: draggingIdx === i ? 0.4 : 1,
+                transition: 'opacity 0.1s',
               }}
             >
               <div style={{
@@ -528,7 +559,12 @@ function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
               }}>
                 {i + 1}
               </div>
-              <span style={{ color: 'var(--border-med)', fontSize: 16, lineHeight: 1, flexShrink: 0 }}>⠿</span>
+              {/* Drag handle — mouse + touch entry point */}
+              <span
+                onTouchStart={() => handleTouchStart(i)}
+                onTouchEnd={handleTouchEnd}
+                style={{ color: 'var(--border-med)', fontSize: 16, lineHeight: 1, flexShrink: 0, cursor: 'grab', touchAction: 'none', padding: '4px 2px' }}
+              >⠿</span>
               {player?.photo ? (
                 <img src={player.photo} alt={player.name}
                   style={{ width: 30, height: 30, borderRadius: 4, objectFit: 'cover', objectPosition: 'top', background: 'var(--bg-raised)', flexShrink: 0 }}
