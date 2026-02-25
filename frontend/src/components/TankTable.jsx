@@ -40,10 +40,10 @@ function Th({ children, divider = false, compact = false, className = '', extraS
   )
 }
 
-function Td({ children, divider = false, compact = false, className = '', extraStyle = {} }) {
+function Td({ children, divider = false, compact = false, wrap = false, className = '', extraStyle = {} }) {
   return (
     <td
-      className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-sm whitespace-nowrap ${className}`}
+      className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-sm ${wrap ? 'whitespace-normal' : 'whitespace-nowrap'} ${className}`}
       style={{
         borderLeft: divider ? '1px solid var(--border)' : undefined,
         paddingLeft: divider ? (compact ? 6 : 12) : undefined,
@@ -94,6 +94,7 @@ export default function TankTable({ data, loading, error }) {
               <Th>OFF</Th>
               <Th>DEF</Th>
               <Th>REM SOS</Th>
+              <Th className="min-w-[72px]">VS B6</Th>
               <Th>TOP 4%</Th>
               <Th divider compact>P1</Th>
               {PICKS.slice(1).map(p => <Th key={p} compact>P{p}</Th>)}
@@ -184,6 +185,20 @@ export default function TankTable({ data, loading, error }) {
                           .{String(Math.round(team.sos * 1000)).padStart(3, '0')}
                         </span>
                       : <span style={{ color: 'var(--text-faint)' }}>—</span>}
+                  </Td>
+
+                  <Td wrap extraStyle={{ ...jazzT, minWidth: 72, lineHeight: 1.6 }}>
+                    {(team.vs_bottom6 || []).length === 0
+                      ? <span style={{ color: 'var(--text-faint)' }}>—</span>
+                      : (team.vs_bottom6).map((g, i) => (
+                          <span key={i}>
+                            {i > 0 && <span style={{ color: 'var(--border-med)' }}>, </span>}
+                            <span className="text-[10px]" style={{ color: 'var(--text)', fontWeight: g.home ? 600 : 400 }}>
+                              {g.home ? g.opp_abbr : g.opp_abbr.toLowerCase()}
+                            </span>
+                          </span>
+                        ))
+                    }
                   </Td>
 
                   <Td extraStyle={jazzT}>

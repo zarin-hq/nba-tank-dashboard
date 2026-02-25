@@ -11,7 +11,11 @@ from datetime import date as date_
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from nba_data import get_standings, get_advanced_stats, get_today_games, get_remaining_sos, get_injuries_for_games
+from nba_data import (
+    get_standings, get_advanced_stats, get_today_games,
+    get_remaining_sos, get_future_games, get_injuries_for_games,
+    NBA_ABBR,
+)
 from lottery import run_simulation, top4_from_results, N_SLOTS, _simulate_one
 
 app = FastAPI(title="NBA Tank Dashboard")
@@ -104,6 +108,7 @@ async def _pre_warm():
                 await asyncio.gather(
                     loop.run_in_executor(executor, get_advanced_stats),
                     loop.run_in_executor(executor, get_remaining_sos),
+                    loop.run_in_executor(executor, get_future_games),
                 )
                 print(f"[startup] pre-warm complete: {len(standings)} teams loaded")
                 asyncio.create_task(_refresh_loop())
@@ -151,15 +156,27 @@ async def health():
 @app.get("/api/standings")
 async def standings_endpoint():
     loop = asyncio.get_event_loop()
-    standings, advanced, sos = await asyncio.gather(
+    standings, advanced, sos, future_games = await asyncio.gather(
         loop.run_in_executor(executor, get_standings),
         loop.run_in_executor(executor, get_advanced_stats),
         loop.run_in_executor(executor, get_remaining_sos),
+        loop.run_in_executor(executor, get_future_games),
     )
 
     lottery = _get_lottery()
     sorted_teams = _sort_lottery(standings)
     worst = sorted_teams[0] if sorted_teams else None
+
+    # Bottom 6 team IDs (worst records) for the VS B6 column
+    bottom6_ids = {t["team_id"] for t in sorted_teams[:6]}
+
+    # Build per-team remaining games vs bottom-6 opponents
+    vs_b6_map: Dict[int, List] = {}
+    for h, a in future_games:
+        if a in bottom6_ids:
+            vs_b6_map.setdefault(h, []).append({"opp_abbr": NBA_ABBR.get(a, "?"), "home": True})
+        if h in bottom6_ids:
+            vs_b6_map.setdefault(a, []).append({"opp_abbr": NBA_ABBR.get(h, "?"), "home": False})
 
     result = []
     for slot_idx, team in enumerate(sorted_teams[:14]):
@@ -179,6 +196,7 @@ async def standings_endpoint():
             "off_rtg_rank": adv.get("off_rtg_rank"),
             "def_rtg_rank": adv.get("def_rtg_rank"),
             "sos": sos.get(tid),
+            "vs_bottom6": vs_b6_map.get(tid, []),
             "top4_odds": top4_from_results(slot, lottery),
             "pick_odds": {str(k): v for k, v in slot_odds.items()},
         })

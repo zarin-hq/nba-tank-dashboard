@@ -22,6 +22,18 @@ NBA_TO_ESPN_ABBR: Dict[int, str] = {
 }
 ESPN_ABBR_TO_NBA: Dict[str, int] = {v: k for k, v in NBA_TO_ESPN_ABBR.items()}
 
+# Standard 3-letter NBA abbreviations (for display)
+NBA_ABBR: Dict[int, str] = {
+    1610612737: "ATL", 1610612738: "BOS", 1610612739: "CLE", 1610612740: "NOP",
+    1610612741: "CHI", 1610612742: "DAL", 1610612743: "DEN", 1610612744: "GSW",
+    1610612745: "HOU", 1610612746: "LAC", 1610612747: "LAL", 1610612748: "MIA",
+    1610612749: "MIL", 1610612750: "MIN", 1610612751: "BKN", 1610612752: "NYK",
+    1610612753: "ORL", 1610612754: "IND", 1610612755: "PHI", 1610612756: "PHX",
+    1610612757: "POR", 1610612758: "SAC", 1610612759: "SAS", 1610612760: "OKC",
+    1610612761: "TOR", 1610612762: "UTA", 1610612763: "MEM", 1610612764: "WAS",
+    1610612765: "DET", 1610612766: "CHA",
+}
+
 ESPN_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
 
 _cache: Dict[str, tuple] = {}
@@ -198,10 +210,11 @@ def get_today_games(date_str: str = None) -> List[Dict]:
         return _get_stale(cache_key) or []
 
 
-# ── Remaining SOS (NBA CDN schedule — accessible from cloud) ─────────────────
+# ── Remaining schedule (NBA CDN — accessible from cloud) ─────────────────────
 
-def get_remaining_sos() -> Dict[int, float]:
-    cached = _get("sos")
+def get_future_games() -> List[tuple]:
+    """Returns list of (home_team_id, away_team_id) for all remaining games."""
+    cached = _get("future_games")
     if cached is not None:
         return cached
 
@@ -212,13 +225,8 @@ def get_remaining_sos() -> Dict[int, float]:
             headers={"User-Agent": "Mozilla/5.0"},
         )
         data = r.json()
-
-        standings = get_standings()
-        win_pct = {s["team_id"]: s["win_pct"] for s in standings}
-
         today = date.today()
-        remaining: Dict[int, List[float]] = {}
-
+        games = []
         for gd in data.get("leagueSchedule", {}).get("gameDates", []):
             raw_date = gd.get("gameDate", "")
             try:
@@ -231,9 +239,26 @@ def get_remaining_sos() -> Dict[int, float]:
                 h = g.get("homeTeam", {}).get("teamId")
                 a = g.get("awayTeam", {}).get("teamId")
                 if h and a:
-                    remaining.setdefault(h, []).append(win_pct.get(a, 0.5))
-                    remaining.setdefault(a, []).append(win_pct.get(h, 0.5))
+                    games.append((h, a))
+        _set("future_games", games)
+        return games
+    except Exception as e:
+        print(f"[future_games] error: {e}")
+        return _get_stale("future_games") or []
 
+
+def get_remaining_sos() -> Dict[int, float]:
+    cached = _get("sos")
+    if cached is not None:
+        return cached
+
+    try:
+        standings = get_standings()
+        win_pct = {s["team_id"]: s["win_pct"] for s in standings}
+        remaining: Dict[int, List[float]] = {}
+        for h, a in get_future_games():
+            remaining.setdefault(h, []).append(win_pct.get(a, 0.5))
+            remaining.setdefault(a, []).append(win_pct.get(h, 0.5))
         sos = {tid: round(sum(opps) / len(opps), 3) for tid, opps in remaining.items() if opps}
         _set("sos", sos)
         return sos
