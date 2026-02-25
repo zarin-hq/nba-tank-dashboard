@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Salt City Hoops brand tokens */
+  --sch-black:       #000000;
+  --sch-white:       #ffffff;
+  --sch-brand-blue:  #052065;
+  --sch-steel-blue:  #1d6daa;
+  --sch-teal:        #00d598;   /* brand-teal-on-white */
+  --sch-teal-bright: #00ffb6;
+  --sch-dark-gray:   #252627;
+  --sch-med-gray:    #585a5c;
+  --sch-light-gray:  #b7b8bd;
+  --sch-smoke:       #eceff1;
+
+  /* Semantic aliases */
+  --bg:         #fafafa;
+  --bg-card:    #ffffff;
+  --bg-raised:  #f3f3f3;
+  --border:     #e2e2e2;
+  --border-med: #ccc;
+  --text:       #252627;
+  --text-muted: #606263;
+  --text-faint: #606263;
+  --accent:     #052065;
+  --accent-2:   #1d6daa;
+  --accent-teal:#00d598;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Archivo', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display { font-family: 'Archivo Black', Arial, sans-serif; }
+
+.scrollbar-thin::-webkit-scrollbar { height: 5px; width: 5px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: var(--bg-raised); }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--sch-med-gray); }
+
+@keyframes grow-up {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes logo-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.08); }
+  70%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pick-reveal {
+  from { opacity: 0; transform: scale(0.88) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
