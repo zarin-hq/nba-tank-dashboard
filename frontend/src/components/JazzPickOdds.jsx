@@ -128,7 +128,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
 
 function PlayerStatsContent({ player }) {
   if (!player?.stats) return null
-  const { ppg, rpg, apg } = player.stats
+  const { ppg, rpg, apg, tpct } = player.stats
   return (
     <>
       <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest"
@@ -136,10 +136,10 @@ function PlayerStatsContent({ player }) {
         {player.name}
       </div>
       <div className="flex justify-around px-2 py-2.5">
-        {[['PPG', ppg], ['RPG', rpg], ['APG', apg]].map(([label, val]) => (
+        {[['PPG', ppg, false], ['RPG', rpg, false], ['APG', apg, false], ['3P%', tpct, true]].map(([label, val, isPct]) => (
           <div key={label} className="flex flex-col items-center gap-0.5">
             <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text)' }}>
-              {val.toFixed(1)}
+              {val != null ? val.toFixed(1) + (isPct ? '%' : '') : '—'}
             </span>
             <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-faint)' }}>
               {label}
@@ -329,9 +329,9 @@ export default function JazzPickOdds({ data, loading, error }) {
               {expandedPick === pick && player?.stats && (
                 <div className="flex items-center gap-4 rounded-lg px-3 py-2"
                   style={{ background: 'var(--bg-raised)', marginLeft: 46 }}>
-                  {[['PPG', player.stats.ppg], ['RPG', player.stats.rpg], ['APG', player.stats.apg]].map(([label, val]) => (
+                  {[['PPG', player.stats.ppg, false], ['RPG', player.stats.rpg, false], ['APG', player.stats.apg, false], ['3P%', player.stats.tpct, true]].map(([label, val, isPct]) => (
                     <div key={label} className="flex flex-col items-center gap-0.5">
-                      <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text)' }}>{val.toFixed(1)}</span>
+                      <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text)' }}>{val != null ? val.toFixed(1) + (isPct ? '%' : '') : '—'}</span>
                       <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-faint)' }}>{label}</span>
                     </div>
                   ))}
