@@ -138,7 +138,7 @@ export default function TankTable({ data, loading, error }) {
               <Th onClick={() => setShowPicks(p => !p)}>
                 <span className="flex items-center gap-1">
                   TOP 4%
-                  <span style={{ fontSize: 9, opacity: 0.5, letterSpacing: 0 }}>
+                  <span style={{ fontSize: 9, opacity: 0.75, letterSpacing: 0 }}>
                     {showPicks ? '‹‹' : '››'}
                   </span>
                 </span>

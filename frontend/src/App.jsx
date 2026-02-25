@@ -102,10 +102,11 @@ export default function App() {
             </span>
             <button
               onClick={refetchAll}
-              className="hidden sm:block text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wide"
-              style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
+              className="hidden sm:block"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: 18, lineHeight: 1, padding: 0 }}
+              title="Refresh"
             >
-              ↻ Refresh
+              ↻
             </button>
           </div>
         </div>
