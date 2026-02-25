@@ -167,6 +167,12 @@ async def standings_endpoint():
     sorted_teams = _sort_lottery(standings)
     worst = sorted_teams[0] if sorted_teams else None
 
+    # Compute OFF/DEF ranks across all teams from ESPN scoring data
+    teams_with_off = [(t["team_id"], t["off_rtg"]) for t in standings if t.get("off_rtg") is not None]
+    teams_with_def = [(t["team_id"], t["def_rtg"]) for t in standings if t.get("def_rtg") is not None]
+    off_rank_map = {tid: r + 1 for r, (tid, _) in enumerate(sorted(teams_with_off, key=lambda x: -x[1]))}
+    def_rank_map = {tid: r + 1 for r, (tid, _) in enumerate(sorted(teams_with_def, key=lambda x: x[1]))}
+
     # Bottom 6 team IDs (worst records) for the VS B6 column
     bottom6_ids = {t["team_id"] for t in sorted_teams[:6]}
 
@@ -193,8 +199,8 @@ async def standings_endpoint():
             "off_rtg": adv.get("off_rtg") if adv.get("off_rtg") is not None else team.get("off_rtg"),
             "def_rtg": adv.get("def_rtg") if adv.get("def_rtg") is not None else team.get("def_rtg"),
             "net_rtg_rank": adv.get("net_rtg_rank"),
-            "off_rtg_rank": adv.get("off_rtg_rank"),
-            "def_rtg_rank": adv.get("def_rtg_rank"),
+            "off_rtg_rank": adv.get("off_rtg_rank") or off_rank_map.get(tid),
+            "def_rtg_rank": adv.get("def_rtg_rank") or def_rank_map.get(tid),
             "sos": sos.get(tid),
             "vs_bottom6": vs_b6_map.get(tid, []),
             "top4_odds": top4_from_results(slot, lottery),
