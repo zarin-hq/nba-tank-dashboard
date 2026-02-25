@@ -110,14 +110,14 @@ export default function TankTable({ data, loading, error }) {
                 <tr key={team.team_id}
                   style={{
                     background: rowBg,
-                    borderTop: isJazz ? '2px solid var(--sch-black)' : undefined,
-                    borderBottom: isJazz ? '2px solid var(--sch-black)' : '1px solid var(--border)',
+                    borderTop: isJazz ? '1px solid var(--sch-black)' : undefined,
+                    borderBottom: isJazz ? '1px solid var(--sch-black)' : '1px solid var(--border)',
                     transition: 'background 0.1s',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = rowBg }}
                 >
-                  <Td extraStyle={isJazz ? { borderLeft: '3px solid var(--sch-black)' } : {}}>
+                  <Td extraStyle={isJazz ? { borderLeft: '1px solid var(--sch-black)' } : {}}>
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
@@ -192,7 +192,7 @@ export default function TankTable({ data, loading, error }) {
 
                   {PICKS.map((p, idx) => (
                     <Td key={p} divider={idx === 0} compact
-                      extraStyle={isJazz && idx === PICKS.length - 1 ? { borderRight: '3px solid var(--sch-black)' } : {}}>
+                      extraStyle={isJazz && idx === PICKS.length - 1 ? { borderRight: '1px solid var(--sch-black)' } : {}}>
                       <OddsCell pct={team.pick_odds?.[String(p)]} />
                     </Td>
                   ))}
