@@ -89,6 +89,10 @@ def get_standings() -> List[Dict]:
                 wins   = int(_stat_val(sl, "wins"))
                 losses = int(_stat_val(sl, "losses"))
 
+                off_rtg_val = _stat_val(sl, "avgPointsFor")
+                def_rtg_val = _stat_val(sl, "avgPointsAgainst")
+                net_rtg_val = _stat_val(sl, "differential")
+
                 result.append({
                     "team_id":     nba_id,
                     "team_city":   team.get("location", ""),
@@ -103,6 +107,9 @@ def get_standings() -> List[Dict]:
                     "l10":         _stat_disp(sl, "Last Ten Games"),
                     "streak":      _stat_disp(sl, "streak"),
                     "point_diff":  round(float(_stat_val(sl, "pointDifferential")), 1),
+                    "off_rtg":     round(float(off_rtg_val), 1) if off_rtg_val else None,
+                    "def_rtg":     round(float(def_rtg_val), 1) if def_rtg_val else None,
+                    "net_rtg":     round(float(net_rtg_val), 1) if net_rtg_val else None,
                 })
 
         _set("standings", result)
