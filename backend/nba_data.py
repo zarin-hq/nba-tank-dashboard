@@ -1,18 +1,15 @@
 """
-NBA API wrappers with simple in-memory caching (5-minute TTL).
+NBA data via ESPN public APIs + NBA CDN. No stats.nba.com calls (blocked on cloud).
+Simple in-memory cache with 5-minute TTL and stale fallback.
 """
 import time
 import httpx
-import random
 from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
-from nba_api.stats.endpoints import leaguestandingsv3, leaguedashteamstats, scoreboardv2
-
-CURRENT_SEASON = "2025-26"
 CACHE_TTL = 300  # seconds
 
-# NBA team ID → ESPN abbreviation (used to match injury data)
+# NBA team ID → ESPN abbreviation
 NBA_TO_ESPN_ABBR: Dict[int, str] = {
     1610612737: "ATL", 1610612738: "BOS", 1610612739: "CLE", 1610612740: "NO",
     1610612741: "CHI", 1610612742: "DAL", 1610612743: "DEN", 1610612744: "GS",
@@ -23,20 +20,9 @@ NBA_TO_ESPN_ABBR: Dict[int, str] = {
     1610612761: "TOR", 1610612762: "UTA", 1610612763: "MEM", 1610612764: "WSH",
     1610612765: "DET", 1610612766: "CHA",
 }
+ESPN_ABBR_TO_NBA: Dict[str, int] = {v: k for k, v in NBA_TO_ESPN_ABBR.items()}
 
 ESPN_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
-
-# stats.nba.com requires these headers or it returns 403/empty from cloud IPs
-NBA_HEADERS = {
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Host": "stats.nba.com",
-    "Origin": "https://www.nba.com",
-    "Referer": "https://www.nba.com/",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "x-nba-stats-origin": "stats",
-    "x-nba-stats-token": "true",
-}
 
 _cache: Dict[str, tuple] = {}
 
@@ -50,7 +36,7 @@ def _get(key: str) -> Optional[Any]:
 
 
 def _get_stale(key: str) -> Optional[Any]:
-    """Return cached value even if expired — used as fallback when API fails."""
+    """Return cached value even if expired — fallback when API fails."""
     return _cache[key][0] if key in _cache else None
 
 
@@ -58,18 +44,21 @@ def _set(key: str, data: Any) -> None:
     _cache[key] = (data, time.time())
 
 
-def _retry_nba(fn, retries=3):
-    """Call fn up to retries times with jittered backoff."""
-    for attempt in range(retries):
-        try:
-            return fn()
-        except Exception as e:
-            if attempt == retries - 1:
-                raise
-            wait = 3 * (attempt + 1) + random.uniform(0, 2)
-            print(f"[nba_api] attempt {attempt + 1} failed: {e}. Retrying in {wait:.1f}s...")
-            time.sleep(wait)
+def _stat_val(stats_list: list, name: str, default=0):
+    for s in stats_list:
+        if s.get("name") == name:
+            return s.get("value", default)
+    return default
 
+
+def _stat_disp(stats_list: list, name: str, default="") -> str:
+    for s in stats_list:
+        if s.get("name") == name:
+            return s.get("displayValue", default)
+    return default
+
+
+# ── Standings (ESPN) ──────────────────────────────────────────────────────────
 
 def get_standings() -> List[Dict]:
     cached = _get("standings")
@@ -77,34 +66,50 @@ def get_standings() -> List[Dict]:
         return cached
 
     try:
-        def _fetch():
-            resp = leaguestandingsv3.LeagueStandingsV3(
-                season=CURRENT_SEASON,
-                season_type="Regular Season",
-                league_id="00",
-                headers=NBA_HEADERS,
-                timeout=30,
-            )
-            df = resp.get_data_frames()[0]
-            result = []
-            for _, row in df.iterrows():
+        r = httpx.get(
+            "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/standings",
+            timeout=15.0,
+            headers=ESPN_HEADERS,
+        )
+        data = r.json()
+
+        result = []
+        for conf_block in data.get("children", []):
+            conf_name = conf_block.get("name", "")
+            conf_short = "East" if "Eastern" in conf_name else "West"
+
+            for entry in conf_block.get("standings", {}).get("entries", []):
+                team = entry.get("team", {})
+                abbr = team.get("abbreviation", "")
+                nba_id = ESPN_ABBR_TO_NBA.get(abbr)
+                if not nba_id:
+                    continue
+
+                sl = entry.get("stats", [])
+                wins   = int(_stat_val(sl, "wins"))
+                losses = int(_stat_val(sl, "losses"))
+
+                # ESPN streak: find stat named "streak" or "Streak"
+                streak = (_stat_disp(sl, "streak")
+                          or _stat_disp(sl, "Streak")
+                          or _stat_disp(sl, "streakTotal", ""))
+
                 result.append({
-                    "team_id": int(row["TeamID"]),
-                    "team_city": str(row["TeamCity"]),
-                    "team_name": str(row["TeamName"]),
-                    "wins": int(row["WINS"]),
-                    "losses": int(row["LOSSES"]),
-                    "win_pct": float(row["WinPCT"]),
-                    "conference": str(row["Conference"]),
-                    "conf_record": str(row["ConferenceRecord"]),
-                    "home_record": str(row["HOME"]),
-                    "road_record": str(row["ROAD"]),
-                    "l10": str(row["L10"]),
-                    "streak": str(row["strCurrentStreak"]),
-                    "point_diff": float(row.get("DiffPoints_PG") or 0),
+                    "team_id":     nba_id,
+                    "team_city":   team.get("location", ""),
+                    "team_name":   team.get("name", ""),
+                    "wins":        wins,
+                    "losses":      losses,
+                    "win_pct":     round(float(_stat_val(sl, "winPercent")), 3),
+                    "conference":  conf_short,
+                    "conf_record": "",
+                    "home_record": _stat_disp(sl, "Home"),
+                    "road_record": _stat_disp(sl, "Road"),
+                    "l10":         _stat_disp(sl, "Last Ten") or _stat_disp(sl, "last10"),
+                    "streak":      streak,
+                    "point_diff":  round(float(_stat_val(sl, "pointDifferential")), 1),
                 })
-            return result
-        result = _retry_nba(_fetch)
+
         _set("standings", result)
         return result
     except Exception as e:
@@ -112,41 +117,14 @@ def get_standings() -> List[Dict]:
         return _get_stale("standings") or []
 
 
+# ── Advanced stats — not available from cloud-accessible endpoints ────────────
+# Returns empty dict; table shows "—" for NET/OFF/DEF RTG columns.
+
 def get_advanced_stats() -> Dict[int, Dict]:
-    cached = _get("advanced")
-    if cached is not None:
-        return cached
+    return {}
 
-    try:
-        def _fetch():
-            resp = leaguedashteamstats.LeagueDashTeamStats(
-                season=CURRENT_SEASON,
-                season_type_all_star="Regular Season",
-                measure_type_detailed_defense="Advanced",
-                per_mode_detailed="PerGame",
-                headers=NBA_HEADERS,
-                timeout=30,
-            )
-            df = resp.get_data_frames()[0]
-            result = {}
-            for _, row in df.iterrows():
-                tid = int(row["TEAM_ID"])
-                result[tid] = {
-                    "net_rtg": float(row.get("NET_RATING") or 0),
-                    "off_rtg": float(row.get("OFF_RATING") or 0),
-                    "def_rtg": float(row.get("DEF_RATING") or 0),
-                    "net_rtg_rank": int(row.get("NET_RATING_RANK") or 0),
-                    "off_rtg_rank": int(row.get("OFF_RATING_RANK") or 0),
-                    "def_rtg_rank": int(row.get("DEF_RATING_RANK") or 0),
-                }
-            return result
-        result = _retry_nba(_fetch)
-        _set("advanced", result)
-        return result
-    except Exception as e:
-        print(f"[advanced_stats] error: {e}")
-        return _get_stale("advanced") or {}
 
+# ── Today's games (ESPN scoreboard) ──────────────────────────────────────────
 
 def get_today_games(date_str: str = None) -> List[Dict]:
     if date_str is None:
@@ -157,35 +135,58 @@ def get_today_games(date_str: str = None) -> List[Dict]:
         return cached
 
     try:
-        resp = _retry_nba(lambda: scoreboardv2.ScoreboardV2(game_date=date_str, league_id="00", headers=NBA_HEADERS, timeout=30))
-        games_df = resp.game_header.get_data_frame()
-        linescore_df = resp.line_score.get_data_frame()
+        espn_date = date_str.replace("-", "")
+        r = httpx.get(
+            f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={espn_date}",
+            timeout=15.0,
+            headers=ESPN_HEADERS,
+        )
+        data = r.json()
 
         games = []
-        for _, game in games_df.iterrows():
-            gid = game["GAME_ID"]
-            home_id = int(game["HOME_TEAM_ID"])
-            away_id = int(game["VISITOR_TEAM_ID"])
+        for event in data.get("events", []):
+            comps = event.get("competitions", [])
+            if not comps:
+                continue
+            comp = comps[0]
 
-            def get_score(team_id):
-                rows = linescore_df[
-                    (linescore_df["GAME_ID"] == gid) &
-                    (linescore_df["TEAM_ID"] == team_id)
-                ]
-                if rows.empty:
-                    return None
-                val = rows.iloc[0]["PTS"]
-                return int(val) if val is not None and str(val) != "nan" else None
+            competitors = comp.get("competitors", [])
+            home = next((c for c in competitors if c.get("homeAway") == "home"), None)
+            away = next((c for c in competitors if c.get("homeAway") == "away"), None)
+            if not home or not away:
+                continue
+
+            home_id = ESPN_ABBR_TO_NBA.get(home.get("team", {}).get("abbreviation", ""))
+            away_id = ESPN_ABBR_TO_NBA.get(away.get("team", {}).get("abbreviation", ""))
+            if not home_id or not away_id:
+                continue
+
+            status_type = comp.get("status", {}).get("type", {})
+            if status_type.get("completed"):
+                status_id = 3
+            elif status_type.get("state") == "in":
+                status_id = 2
+            else:
+                status_id = 1
+
+            status_text = status_type.get("shortDetail", "")
+
+            def parse_score(competitor):
+                s = competitor.get("score", "")
+                return int(s) if s and str(s).isdigit() else None
+
+            broadcasts = comp.get("broadcasts", [])
+            natl_tv = broadcasts[0].get("names", [""])[0] if broadcasts else ""
 
             games.append({
-                "game_id": gid,
-                "status_id": int(game.get("GAME_STATUS_ID", 1)),
-                "status_text": str(game.get("GAME_STATUS_TEXT", "")),
+                "game_id":      event.get("id", ""),
+                "status_id":    status_id,
+                "status_text":  status_text,
                 "home_team_id": home_id,
                 "away_team_id": away_id,
-                "home_score": get_score(home_id),
-                "away_score": get_score(away_id),
-                "national_tv": str(game.get("NATL_TV_BROADCASTER_ABBREVIATION", "") or ""),
+                "home_score":   parse_score(home),
+                "away_score":   parse_score(away),
+                "national_tv":  natl_tv,
             })
 
         _set(cache_key, games)
@@ -194,6 +195,8 @@ def get_today_games(date_str: str = None) -> List[Dict]:
         print(f"[today_games] error: {e}")
         return _get_stale(cache_key) or []
 
+
+# ── Remaining SOS (NBA CDN schedule — accessible from cloud) ─────────────────
 
 def get_remaining_sos() -> Dict[int, float]:
     cached = _get("sos")
@@ -217,7 +220,6 @@ def get_remaining_sos() -> Dict[int, float]:
         for gd in data.get("leagueSchedule", {}).get("gameDates", []):
             raw_date = gd.get("gameDate", "")
             try:
-                # Format: "10/02/2025 00:00:00"
                 gdate = datetime.strptime(raw_date[:10], "%m/%d/%Y").date()
             except Exception:
                 continue
@@ -238,11 +240,9 @@ def get_remaining_sos() -> Dict[int, float]:
         return _get_stale("sos") or {}
 
 
+# ── Injuries (ESPN game summary) ──────────────────────────────────────────────
+
 def get_injuries_for_games(nba_team_ids: List[int], date_str: str = None) -> Dict[int, List[Dict]]:
-    """
-    Fetch injury reports for games involving the given NBA team IDs.
-    Uses ESPN game summary API. Returns {nba_team_id: [injury_entries]}.
-    """
     if date_str is None:
         date_str = date.today().strftime("%Y-%m-%d")
     cache_key = f"injuries_{date_str}"
@@ -250,18 +250,13 @@ def get_injuries_for_games(nba_team_ids: List[int], date_str: str = None) -> Dic
     if cached is not None:
         return cached
 
-    espn_date = date_str.replace("-", "")  # YYYYMMDD for ESPN API
+    espn_date = date_str.replace("-", "")
     try:
-        # 1. Get ESPN scoreboard for the requested date to find game IDs
         sb = httpx.get(
             f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={espn_date}",
             timeout=10.0, headers=ESPN_HEADERS,
         ).json()
 
-        # Build ESPN abbr → NBA team id reverse map (only for teams we care about)
-        espn_abbr_to_nba = {v: k for k, v in NBA_TO_ESPN_ABBR.items()}
-
-        # Find ESPN game IDs that involve our teams
         target_espn_abbrs = {NBA_TO_ESPN_ABBR[tid] for tid in nba_team_ids if tid in NBA_TO_ESPN_ABBR}
         game_ids = []
         for event in sb.get("events", []):
@@ -274,7 +269,6 @@ def get_injuries_for_games(nba_team_ids: List[int], date_str: str = None) -> Dic
 
         game_ids = list(set(game_ids))
 
-        # 2. Fetch injuries from each game summary
         result: Dict[int, List[Dict]] = {}
         for gid in game_ids:
             try:
@@ -285,7 +279,7 @@ def get_injuries_for_games(nba_team_ids: List[int], date_str: str = None) -> Dic
 
                 for team_injury_block in summary.get("injuries", []):
                     team_abbr = team_injury_block.get("team", {}).get("abbreviation", "")
-                    nba_id = espn_abbr_to_nba.get(team_abbr)
+                    nba_id = ESPN_ABBR_TO_NBA.get(team_abbr)
                     if nba_id is None:
                         continue
 
@@ -293,18 +287,17 @@ def get_injuries_for_games(nba_team_ids: List[int], date_str: str = None) -> Dic
                     for inj in team_injury_block.get("injuries", []):
                         athlete = inj.get("athlete", {})
                         details = inj.get("details", {})
-                        status = inj.get("status", "")
                         injury_type = details.get("type", "")
                         detail = details.get("detail", "")
                         side = details.get("side", "")
                         desc_parts = [p for p in [injury_type, detail, side] if p and p != "Not Specified"]
                         players.append({
-                            "name": athlete.get("displayName", ""),
+                            "name":       athlete.get("displayName", ""),
                             "short_name": athlete.get("shortName", ""),
-                            "position": athlete.get("position", {}).get("abbreviation", ""),
-                            "status": status,
+                            "position":   athlete.get("position", {}).get("abbreviation", ""),
+                            "status":     inj.get("status", ""),
                             "description": " / ".join(desc_parts) if desc_parts else injury_type,
-                            "headshot": athlete.get("headshot", {}).get("href", ""),
+                            "headshot":   athlete.get("headshot", {}).get("href", ""),
                         })
 
                     if players:
