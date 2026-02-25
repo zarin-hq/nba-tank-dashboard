@@ -224,6 +224,9 @@ function PlayerPhoto({ player }) {
 export default function JazzPickOdds({ data, loading, error }) {
   const bigBoard = useBigBoard()
   const draftHistory = useDraftHistory()
+  const [playerOrder, setPlayerOrder] = useState(null)
+  const [showReorder, setShowReorder] = useState(false)
+  const effectiveBoard = playerOrder ?? bigBoard
 
   if (loading) return (
     <div className="p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16 }}>
@@ -259,7 +262,7 @@ export default function JazzPickOdds({ data, loading, error }) {
       {/* Mobile vertical list — hidden on sm+ */}
       <div className="sm:hidden px-4 py-4 space-y-3">
         {picks.map(({ pick, pct }) => {
-          const player = bigBoard.find(p => p.rank === pick)
+          const player = effectiveBoard[pick - 1]
           const barW = Math.round((pct / maxPct) * 100)
           const color = barColor(pick, pct)
           const isLottery = pick <= 4
@@ -366,7 +369,7 @@ export default function JazzPickOdds({ data, loading, error }) {
         {/* Player photos row */}
         <div className="flex gap-1 pt-3">
           {picks.map(({ pick }) => {
-            const player = bigBoard.find(p => p.rank === pick)
+            const player = effectiveBoard[pick - 1]
             return (
               <div key={pick} className="flex-1 flex flex-col items-center min-w-0">
                 <PlayerPhoto player={player} />
@@ -375,6 +378,25 @@ export default function JazzPickOdds({ data, loading, error }) {
           })}
         </div>
       </div>
+
+      {/* Change player order */}
+      <div className="flex justify-end px-5 py-2" style={{ borderTop: '1px solid var(--border)' }}>
+        <button
+          onClick={() => bigBoard.length > 0 && setShowReorder(true)}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 11, color: 'var(--text-muted)', textDecoration: 'underline' }}
+        >
+          Change player order
+        </button>
+      </div>
+
+      {showReorder && (
+        <ReorderModal
+          initialOrder={playerOrder ?? bigBoard}
+          defaultOrder={bigBoard}
+          onApply={order => { setPlayerOrder(order); setShowReorder(false) }}
+          onClose={() => setShowReorder(false)}
+        />
+      )}
     </div>
   )
 }
@@ -417,5 +439,138 @@ function BarColumn({ pick, pct, barH, color, isLotteryPick, delay, draftHistory 
         )}
       </div>
     </div>
+  )
+}
+
+function ReorderModal({ initialOrder, defaultOrder, onApply, onClose }) {
+  const [order, setOrder] = useState([...initialOrder])
+  const dragIdx = useRef(null)
+
+  useEffect(() => {
+    const handler = e => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  function handleDragStart(i) {
+    dragIdx.current = i
+  }
+
+  function handleDragEnter(i) {
+    if (dragIdx.current === null || dragIdx.current === i) return
+    const src = dragIdx.current
+    dragIdx.current = i
+    setOrder(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(src, 1)
+      next.splice(i, 0, moved)
+      return next
+    })
+  }
+
+  function handleDragEnd() {
+    dragIdx.current = null
+  }
+
+  return createPortal(
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 10000 }} />
+      <div style={{
+        position: 'fixed', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(380px, calc(100vw - 24px))',
+        maxHeight: '90dvh',
+        zIndex: 10001,
+        background: '#fff',
+        borderRadius: 16,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.4)',
+      }}>
+        {/* Header */}
+        <div style={{ background: 'var(--sch-black)', borderBottom: '3px solid #00FFB6', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ color: '#fff', fontFamily: "'Archivo Black', Arial, sans-serif", fontSize: 15 }}>Player Order</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', fontSize: 22, lineHeight: 1, padding: '0 2px' }}>×</button>
+        </div>
+
+        {/* Sub-header */}
+        <div style={{ padding: '6px 16px', background: 'var(--bg-raised)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <span style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Drag to reorder · First 10 shown in chart
+          </span>
+        </div>
+
+        {/* List */}
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {order.map((player, i) => (
+            <div
+              key={player?.rank ?? i}
+              draggable
+              onDragStart={() => handleDragStart(i)}
+              onDragEnter={() => handleDragEnter(i)}
+              onDragEnd={handleDragEnd}
+              onDragOver={e => e.preventDefault()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 16px',
+                borderBottom: '1px solid var(--border)',
+                cursor: 'grab',
+                background: i >= 10 ? 'var(--bg-raised)' : '#fff',
+                userSelect: 'none',
+              }}
+            >
+              <div style={{
+                width: 22, height: 22, borderRadius: 5, flexShrink: 0,
+                background: i < 10 ? '#00FFB6' : 'var(--border)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 700, color: i < 10 ? '#000' : 'var(--text-faint)',
+              }}>
+                {i + 1}
+              </div>
+              <span style={{ color: 'var(--border-med)', fontSize: 16, lineHeight: 1, flexShrink: 0 }}>⠿</span>
+              {player?.photo ? (
+                <img src={player.photo} alt={player.name}
+                  style={{ width: 30, height: 30, borderRadius: 4, objectFit: 'cover', objectPosition: 'top', background: 'var(--bg-raised)', flexShrink: 0 }}
+                  onError={e => { e.target.style.display = 'none' }}
+                />
+              ) : (
+                <div style={{ width: 30, height: 30, borderRadius: 4, background: 'var(--bg-raised)', flexShrink: 0 }} />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {player?.name ?? '—'}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-faint)' }}>
+                  {player ? `${player.pos} · ${player.school}` : ''}
+                </div>
+              </div>
+              {i >= 10 && (
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
+                  Not shown
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <button
+            onClick={() => setOrder([...defaultOrder])}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)', textDecoration: 'underline' }}
+          >
+            Reset to default
+          </button>
+          <button
+            onClick={() => onApply(order)}
+            style={{ background: '#00FFB6', color: '#000', border: 'none', borderRadius: 6, padding: '6px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body
   )
 }
