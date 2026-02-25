@@ -235,6 +235,106 @@ function ButtonRow({ b }) {
   )
 }
 
+function Annotation({ label, children }) {
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {children}
+      <div
+        className="text-[10px] font-bold uppercase tracking-widest"
+        style={{
+          position: 'absolute', bottom: '-22px', left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'var(--accent-2)', whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function HeaderPreview() {
+  const [logoPopped, setLogoPopped] = useState(false)
+  const time = new Date().toLocaleTimeString()
+
+  return (
+    <div className="py-6">
+      {/* Spec notes */}
+      <div className="text-xs mb-4" style={{ color: 'var(--text-faint)' }}>
+        Full-width header · height 70px · black bg · 3px teal-bright bottom border · 1px accent top bar
+      </div>
+
+      {/* Live preview, constrained to the content column */}
+      <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        {/* Top accent bar */}
+        <div style={{ height: 4, background: 'var(--accent)' }} />
+
+        {/* Header */}
+        <header
+          className="px-6"
+          style={{ background: 'var(--sch-black)', borderBottom: '3px solid var(--sch-teal-bright)', height: 70, overflow: 'visible' }}
+        >
+          <div className="h-full flex items-center justify-between">
+            {/* Left: logo + title */}
+            <div className="flex items-center gap-8 h-full">
+              <img
+                src="/sch-logo.svg"
+                alt="Salt City Hoops"
+                style={{
+                  width: 81, height: 71, flexShrink: 0,
+                  alignSelf: 'flex-start', marginTop: 15,
+                  position: 'relative', zIndex: 1, cursor: 'pointer',
+                  animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
+                }}
+                onMouseEnter={() => setLogoPopped(true)}
+                onAnimationEnd={() => setLogoPopped(false)}
+              />
+              <h1
+                className="text-2xl tracking-tight leading-none text-white"
+                style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}
+              >
+                JAZZ TANK WATCH
+              </h1>
+            </div>
+
+            {/* Right: timestamp + refresh */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                Updated {time}
+              </span>
+              <button
+                className="text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wide"
+                style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
+              >
+                ↻ Refresh
+              </button>
+            </div>
+          </div>
+        </header>
+      </div>
+
+      {/* Token callouts */}
+      <div className="mt-6 grid gap-2" style={{ gridTemplateColumns: 'max-content 1fr' }}>
+        {[
+          ['Background',    '--sch-black'],
+          ['Bottom border', '3px solid --sch-teal-bright'],
+          ['Top bar',       '4px solid --accent'],
+          ['Title font',    'Archivo Black · 1.5rem · 700 · white'],
+          ['Button',        '--sch-teal-bright bg · --sch-black text · text-xs font-bold uppercase'],
+          ['Timestamp',     'text-xs · rgba(255,255,255,0.35)'],
+          ['Logo hover',    'logo-pop keyframe → scale 1→1.08→1.02→1'],
+        ].map(([label, value]) => (
+          <div key={label} className="contents">
+            <span className="text-xs font-bold pr-4 py-1" style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{label}</span>
+            <code className="text-xs py-1" style={{ color: 'var(--accent-2)', fontFamily: 'monospace' }}>{value}</code>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function Section({ title, children }) {
   return (
     <section className="mb-12">
@@ -318,6 +418,16 @@ export default function StyleGuide() {
           {BUTTON_TOKENS.map(b => (
             <ButtonRow key={b.label} b={b} />
           ))}
+        </Section>
+
+        {/* ── Components ── */}
+        <Section title="Components">
+          <div className="pt-2">
+            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+              Header Bar
+            </div>
+            <HeaderPreview />
+          </div>
         </Section>
       </main>
     </div>
