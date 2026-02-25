@@ -27,6 +27,8 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
   const tooltipW = 188
   const tooltipRef = useRef(null)
   const hideTimer = useRef(null)
+  const visibleRef = useRef(false)
+  useEffect(() => { visibleRef.current = visible }, [visible])
 
   useEffect(() => {
     const el = triggerRef.current
@@ -57,11 +59,16 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
         setVisible(false)
       }
     }
+    function handleTouchStart() {
+      if (visibleRef.current) { setVisible(false) } else { show() }
+    }
     el.addEventListener('mouseenter', show)
     el.addEventListener('mouseleave', scheduleHide)
+    el.addEventListener('touchstart', handleTouchStart, { passive: true })
     return () => {
       el.removeEventListener('mouseenter', show)
       el.removeEventListener('mouseleave', scheduleHide)
+      el.removeEventListener('touchstart', handleTouchStart)
       clearTimeout(hideTimer.current)
     }
   }, [triggerRef, align, placement, clickable])
@@ -80,6 +87,18 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
       el.removeEventListener('mouseleave', scheduleHide)
     }
   }, [clickable, visible])
+
+  // Dismiss on outside touch when visible
+  useEffect(() => {
+    if (!visible) return
+    function dismiss(e) {
+      if (triggerRef.current?.contains(e.target)) return
+      if (tooltipRef.current?.contains(e.target)) return
+      setVisible(false)
+    }
+    const t = setTimeout(() => document.addEventListener('touchstart', dismiss, { passive: true }), 50)
+    return () => { clearTimeout(t); document.removeEventListener('touchstart', dismiss) }
+  }, [visible, triggerRef])
 
   if (!visible) return null
 
@@ -226,6 +245,7 @@ export default function JazzPickOdds({ data, loading, error }) {
   const draftHistory = useDraftHistory()
   const [playerOrder, setPlayerOrder] = useState(null)
   const [showReorder, setShowReorder] = useState(false)
+  const [expandedPick, setExpandedPick] = useState(null)
   const effectiveBoard = playerOrder ?? bigBoard
 
   if (loading) return (
@@ -268,7 +288,11 @@ export default function JazzPickOdds({ data, loading, error }) {
           const isLottery = pick <= 4
           return (
             <div key={pick} className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-2"
+                onClick={() => player?.stats && setExpandedPick(expandedPick === pick ? null : pick)}
+                style={{ cursor: player?.stats ? 'pointer' : undefined }}
+              >
                 <span className="text-xs font-bold tabular-nums flex-shrink-0"
                   style={{ width: 22, color: 'var(--text-muted)' }}>
                   #{pick}
@@ -296,7 +320,31 @@ export default function JazzPickOdds({ data, loading, error }) {
                   style={{ width: 40, textAlign: 'right', color: isLottery ? '#00CF94' : pct >= 20 ? 'var(--accent)' : 'var(--text-muted)' }}>
                   {pct >= 0.5 ? `${pct.toFixed(1)}%` : '—'}
                 </span>
+                {player?.stats && (
+                  <span style={{ fontSize: 10, color: 'var(--border-med)', flexShrink: 0, lineHeight: 1 }}>
+                    {expandedPick === pick ? '▲' : '▼'}
+                  </span>
+                )}
               </div>
+              {expandedPick === pick && player?.stats && (
+                <div className="flex items-center gap-4 rounded-lg px-3 py-2"
+                  style={{ background: 'var(--bg-raised)', marginLeft: 46 }}>
+                  {[['PPG', player.stats.ppg], ['RPG', player.stats.rpg], ['APG', player.stats.apg]].map(([label, val]) => (
+                    <div key={label} className="flex flex-col items-center gap-0.5">
+                      <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text)' }}>{val.toFixed(1)}</span>
+                      <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--text-faint)' }}>{label}</span>
+                    </div>
+                  ))}
+                  {player.bref_url && (
+                    <a href={player.bref_url} target="_blank" rel="noopener noreferrer"
+                      className="text-[10px] font-semibold ml-auto"
+                      style={{ color: 'var(--accent-2)', textDecoration: 'underline' }}
+                      onClick={e => e.stopPropagation()}>
+                      BRef ↗
+                    </a>
+                  )}
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <div style={{ width: 22, flexShrink: 0 }} />
                 <div style={{ width: 24, flexShrink: 0 }} /> {/* photo spacer */}
