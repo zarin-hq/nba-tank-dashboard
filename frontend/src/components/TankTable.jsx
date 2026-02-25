@@ -126,7 +126,7 @@ export default function TankTable({ data, loading, error }) {
           <thead>
             <tr style={{ background: 'var(--sch-black)' }}>
               <Th extraStyle={{ width: 40, position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>#</Th>
-              <Th className="min-w-[140px]" extraStyle={{ position: 'sticky', left: 38, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
+              <Th extraStyle={{ position: 'sticky', left: 38, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
               <Th>W–L</Th>
               <Th tooltip="Games Behind">GB</Th>
               <Th>L10</Th>
