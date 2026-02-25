@@ -67,7 +67,7 @@ def get_standings() -> List[Dict]:
 
     try:
         r = httpx.get(
-            "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/standings",
+            "https://site.api.espn.com/apis/v2/sports/basketball/nba/standings",
             timeout=15.0,
             headers=ESPN_HEADERS,
         )
@@ -89,11 +89,6 @@ def get_standings() -> List[Dict]:
                 wins   = int(_stat_val(sl, "wins"))
                 losses = int(_stat_val(sl, "losses"))
 
-                # ESPN streak: find stat named "streak" or "Streak"
-                streak = (_stat_disp(sl, "streak")
-                          or _stat_disp(sl, "Streak")
-                          or _stat_disp(sl, "streakTotal", ""))
-
                 result.append({
                     "team_id":     nba_id,
                     "team_city":   team.get("location", ""),
@@ -105,8 +100,8 @@ def get_standings() -> List[Dict]:
                     "conf_record": "",
                     "home_record": _stat_disp(sl, "Home"),
                     "road_record": _stat_disp(sl, "Road"),
-                    "l10":         _stat_disp(sl, "Last Ten") or _stat_disp(sl, "last10"),
-                    "streak":      streak,
+                    "l10":         _stat_disp(sl, "Last Ten Games"),
+                    "streak":      _stat_disp(sl, "streak"),
                     "point_diff":  round(float(_stat_val(sl, "pointDifferential")), 1),
                 })
 
