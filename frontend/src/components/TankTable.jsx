@@ -35,12 +35,16 @@ function TeamLogo({ teamId }) {
   )
 }
 
-function Th({ children, divider = false, compact = false, className = '', extraStyle = {}, onClick }) {
+function Th({ children, divider = false, compact = false, className = '', extraStyle = {}, onClick, tooltip }) {
+  const [tip, setTip] = useState(false)
   return (
     <th
       onClick={onClick}
+      onMouseEnter={() => tooltip && setTip(true)}
+      onMouseLeave={() => setTip(false)}
       className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-left text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${onClick ? 'cursor-pointer select-none' : ''} ${className}`}
       style={{
+        position: 'relative',
         color: 'rgba(255,255,255,0.6)',
         borderLeft: divider ? '1px solid rgba(255,255,255,0.1)' : undefined,
         paddingLeft: divider ? (compact ? 6 : 12) : undefined,
@@ -48,6 +52,29 @@ function Th({ children, divider = false, compact = false, className = '', extraS
       }}
     >
       {children}
+      {tip && tooltip && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          marginTop: 4,
+          background: '#1a1a1a',
+          color: '#fff',
+          fontSize: 11,
+          fontWeight: 400,
+          textTransform: 'none',
+          letterSpacing: 0,
+          padding: '4px 8px',
+          borderRadius: 4,
+          whiteSpace: 'nowrap',
+          zIndex: 9999,
+          pointerEvents: 'none',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+        }}>
+          {tooltip}
+        </div>
+      )}
     </th>
   )
 }
@@ -101,12 +128,12 @@ export default function TankTable({ data, loading, error }) {
               <Th extraStyle={{ width: 40, position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>#</Th>
               <Th className="min-w-[140px]" extraStyle={{ position: 'sticky', left: 38, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
               <Th>W–L</Th>
-              <Th>GB</Th>
+              <Th tooltip="Games Behind">GB</Th>
               <Th>L10</Th>
               <Th>STRK</Th>
-              <Th>NET RTG</Th>
-              <Th>OFF</Th>
-              <Th>DEF</Th>
+              <Th tooltip="Net Rating">NET RTG</Th>
+              <Th tooltip="Offensive Ranking">OFF</Th>
+              <Th tooltip="Defensive Ranking">DEF</Th>
               <Th>REM SOS</Th>
               <Th onClick={() => setShowPicks(p => !p)}>
                 <span className="flex items-center gap-1">
@@ -116,9 +143,9 @@ export default function TankTable({ data, loading, error }) {
                   </span>
                 </span>
               </Th>
-              <Th className="min-w-[120px]">VS B6</Th>
               {showPicks && <Th divider compact>P1</Th>}
               {showPicks && PICKS.slice(1).map(p => <Th key={p} compact>P{p}</Th>)}
+              <Th className="min-w-[120px]" tooltip="Remaining Games vs. Bottom-6 Teams">VS B6</Th>
             </tr>
           </thead>
           <tbody>
@@ -226,26 +253,26 @@ export default function TankTable({ data, loading, error }) {
                     </span>
                   </Td>
 
-                  <Td extraStyle={{ ...jazzT, minWidth: 120 }}>
-                    {(team.vs_bottom6 || []).length === 0
-                      ? <span style={{ color: 'var(--text-faint)' }}>—</span>
-                      : (team.vs_bottom6).map((g, i) => (
-                          <span key={i}>
-                            {i > 0 && <span style={{ color: 'var(--border-med)' }}>, </span>}
-                            <span className="text-[10px]" style={{ color: 'var(--text)', fontWeight: g.home ? 600 : 400 }}>
-                              {g.home ? g.opp_abbr : g.opp_abbr.toLowerCase()}
-                            </span>
-                          </span>
-                        ))
-                    }
-                  </Td>
-
                   {showPicks && PICKS.map((p, idx) => (
                     <Td key={p} divider={idx === 0} compact
                       extraStyle={{ ...jazzT, ...(isJazz && idx === PICKS.length - 1 ? { borderRight: jb } : {}) }}>
                       <OddsCell pct={team.pick_odds?.[String(p)]} />
                     </Td>
                   ))}
+
+                  <Td extraStyle={{ ...jazzT, minWidth: 120 }}>
+                    {(team.vs_bottom6 || []).length === 0
+                      ? <span style={{ color: 'var(--text-faint)' }}>—</span>
+                      : (team.vs_bottom6).map((g, i) => (
+                          <span key={i}>
+                            {i > 0 && <span style={{ color: 'var(--border-med)' }}>, </span>}
+                            <span className="text-[10px]" style={{ color: 'var(--text)' }}>
+                              {g.home ? g.opp_abbr : g.opp_abbr.toLowerCase()}
+                            </span>
+                          </span>
+                        ))
+                    }
+                  </Td>
                 </tr>
               )
             })}
