@@ -248,8 +248,8 @@ export default function JazzPickOdds({ data, loading, error }) {
 
   function barColor(pick, pct) {
     if (pick <= 4) return '#00FFB6'
-    if (pct >= 20) return 'var(--accent)'
-    if (pct >= 5) return 'var(--accent-2)'
+    if (pick === 5 && pct >= 20) return 'var(--accent)'
+    if (pick === 5 && pct >= 5) return 'var(--accent-2)'
     return 'var(--border-med)'
   }
 
