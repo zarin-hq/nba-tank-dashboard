@@ -27,6 +27,28 @@
   --accent:     #052065;
   --accent-2:   #1d6daa;
   --accent-teal:#00d598;
+
+  /* Typography scale — editable via /style-guide */
+  --type-page-title-size:       1.5rem;
+  --type-page-title-weight:     700;
+  --type-section-size:          0.75rem;
+  --type-section-weight:        400;
+  --type-card-title-size:       1rem;
+  --type-card-title-weight:     400;
+  --type-body-size:             0.875rem;
+  --type-body-weight:           400;
+  --type-body-semibold-size:    0.875rem;
+  --type-body-semibold-weight:  600;
+  --type-body-bold-size:        0.875rem;
+  --type-body-bold-weight:      700;
+  --type-small-size:            0.75rem;
+  --type-small-weight:          400;
+  --type-small-bold-size:       0.75rem;
+  --type-small-bold-weight:     700;
+  --type-micro-size:            0.625rem;
+  --type-micro-weight:          700;
+  --type-mono-size:             0.875rem;
+  --type-mono-weight:           400;
 }
 
 body {

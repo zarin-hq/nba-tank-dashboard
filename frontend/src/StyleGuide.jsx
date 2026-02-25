@@ -54,16 +54,16 @@ const COLOR_TOKENS = [
 ]
 
 const TYPE_TOKENS = [
-  { label: 'Page Title',      example: 'JAZZ TANK WATCH',            family: "'Archivo Black', Arial, sans-serif", size: '1.5rem', weight: 700,  color: '#ffffff',              usage: 'Header h1' },
-  { label: 'Section Heading', example: 'Lottery Standings',          family: "'Archivo Black', Arial, sans-serif", size: '0.75rem', weight: 400, color: 'var(--accent)',        usage: 'Section h2 labels (font-display + uppercase + tracking-widest)' },
-  { label: 'Card Title',      example: '2026 Draft Lottery Simulation', family: "'Archivo Black', Arial, sans-serif", size: '1rem', weight: 400, color: '#ffffff',             usage: 'Lottery modal header' },
-  { label: 'Body',            example: 'Utah Jazz · 14–44 · W2',     family: "'Archivo', Arial, sans-serif",       size: '0.875rem', weight: 400, color: 'var(--text)',       usage: 'Default body text, table cells' },
-  { label: 'Body Semibold',   example: 'New Orleans Pelicans',        family: "'Archivo', Arial, sans-serif",       size: '0.875rem', weight: 600, color: 'var(--text)',       usage: 'Team name in table, game card team name' },
-  { label: 'Body Bold',       example: '14.2%  ·  TOP 4%',           family: "'Archivo', Arial, sans-serif",       size: '0.875rem', weight: 700, color: 'var(--text)',       usage: 'Top-4% odds, pick numbers in Jazz Pick Odds' },
-  { label: 'Small',           example: 'Bottom 10 teams only',        family: "'Archivo', Arial, sans-serif",       size: '0.75rem',  weight: 400, color: 'var(--text-faint)', usage: 'Section subtitles, "Updated …" timestamp' },
-  { label: 'Small Bold',      example: 'Today  ·  ↻ Refresh',        family: "'Archivo', Arial, sans-serif",       size: '0.75rem',  weight: 700, color: 'var(--text)',       usage: 'Date nav label, button text (xs buttons)' },
-  { label: 'Micro Label',     example: 'NET RTG  ·  PPG  ·  P1',     family: "'Archivo', Arial, sans-serif",       size: '0.625rem', weight: 700, color: 'var(--text-muted)', usage: 'Table column headers, tooltip section labels (uppercase + tracking-widest)' },
-  { label: 'Mono / Tabular',  example: '112–108  ·  +3.5  ·  .487',  family: "monospace",                          size: '0.875rem', weight: 400, color: 'var(--text)',       usage: 'Win–loss records, ratings, SOS' },
+  { label: 'Page Title',      example: 'JAZZ TANK WATCH',               family: "'Archivo Black', Arial, sans-serif", size: '1.5rem',   weight: 700, color: '#ffffff',              sizeVar: '--type-page-title-size',   weightVar: '--type-page-title-weight',   usage: 'Header h1' },
+  { label: 'Section Heading', example: 'Lottery Standings',             family: "'Archivo Black', Arial, sans-serif", size: '0.75rem',  weight: 400, color: 'var(--accent)',        sizeVar: '--type-section-size',      weightVar: '--type-section-weight',      usage: 'Section h2 labels (font-display + uppercase + tracking-widest)' },
+  { label: 'Card Title',      example: '2026 Draft Lottery Simulation', family: "'Archivo Black', Arial, sans-serif", size: '1rem',     weight: 400, color: '#ffffff',              sizeVar: '--type-card-title-size',   weightVar: '--type-card-title-weight',   usage: 'Lottery modal header' },
+  { label: 'Body',            example: 'Utah Jazz · 14–44 · W2',        family: "'Archivo', Arial, sans-serif",       size: '0.875rem', weight: 400, color: 'var(--text)',          sizeVar: '--type-body-size',         weightVar: '--type-body-weight',         usage: 'Default body text, table cells' },
+  { label: 'Body Semibold',   example: 'New Orleans Pelicans',           family: "'Archivo', Arial, sans-serif",       size: '0.875rem', weight: 600, color: 'var(--text)',          sizeVar: '--type-body-semibold-size',weightVar: '--type-body-semibold-weight',usage: 'Team name in table, game card team name' },
+  { label: 'Body Bold',       example: '14.2%  ·  TOP 4%',              family: "'Archivo', Arial, sans-serif",       size: '0.875rem', weight: 700, color: 'var(--text)',          sizeVar: '--type-body-bold-size',    weightVar: '--type-body-bold-weight',    usage: 'Top-4% odds, pick numbers in Jazz Pick Odds' },
+  { label: 'Small',           example: 'Bottom 10 teams only',           family: "'Archivo', Arial, sans-serif",       size: '0.75rem',  weight: 400, color: 'var(--text-faint)',    sizeVar: '--type-small-size',        weightVar: '--type-small-weight',        usage: 'Section subtitles, "Updated …" timestamp' },
+  { label: 'Small Bold',      example: 'Today  ·  ↻ Refresh',           family: "'Archivo', Arial, sans-serif",       size: '0.75rem',  weight: 700, color: 'var(--text)',          sizeVar: '--type-small-bold-size',   weightVar: '--type-small-bold-weight',   usage: 'Date nav label, button text (xs buttons)' },
+  { label: 'Micro Label',     example: 'NET RTG  ·  PPG  ·  P1',        family: "'Archivo', Arial, sans-serif",       size: '0.625rem', weight: 700, color: 'var(--text-muted)',    sizeVar: '--type-micro-size',        weightVar: '--type-micro-weight',        usage: 'Table column headers, tooltip section labels (uppercase + tracking-widest)' },
+  { label: 'Mono / Tabular',  example: '112–108  ·  +3.5  ·  .487',     family: 'monospace',                          size: '0.875rem', weight: 400, color: 'var(--text)',          sizeVar: '--type-mono-size',         weightVar: '--type-mono-weight',         usage: 'Win–loss records, ratings, SOS' },
 ]
 
 const BUTTON_TOKENS = [
@@ -179,23 +179,101 @@ function ColorSwatch({ token }) {
   )
 }
 
+function saveVar(name, value) {
+  setCssVar(name, value)
+  const saved = JSON.parse(localStorage.getItem('sg-overrides') || '{}')
+  saved[name] = value
+  localStorage.setItem('sg-overrides', JSON.stringify(saved))
+}
+
+const WEIGHTS = [100, 200, 300, 400, 500, 600, 700, 800, 900]
+
 function TypeRow({ t }) {
+  const [size, setSize]     = useState(() => readCssVar(t.sizeVar)   || t.size)
+  const [weight, setWeight] = useState(() => readCssVar(t.weightVar) || String(t.weight))
+  const [sizeInput, setSizeInput] = useState(size)
+
+  function handleSizeBlur() {
+    const val = sizeInput.trim()
+    if (val) { setSize(val); saveVar(t.sizeVar, val) }
+    else setSizeInput(size)
+  }
+
+  function handleWeightChange(e) {
+    const val = e.target.value
+    setWeight(val)
+    saveVar(t.weightVar, val)
+  }
+
+  const onDark = t.color === '#ffffff'
+
   return (
     <div className="py-4" style={{ borderBottom: '1px solid var(--border)' }}>
       <div className="flex items-start gap-4 flex-wrap">
-        <div style={{ minWidth: 200, flexShrink: 0 }}>
-          <div className="text-xs font-bold mb-0.5 uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{t.label}</div>
-          <div className="text-xs" style={{ color: 'var(--text-faint)', fontFamily: 'monospace' }}>
-            {t.size} · {t.weight} · {t.family.split(',')[0].replace(/'/g, '')}
+
+        {/* Label + controls */}
+        <div style={{ minWidth: 210, flexShrink: 0 }}>
+          <div className="text-xs font-bold mb-2 uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+            {t.label}
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Size input */}
+            <div className="flex flex-col gap-0.5">
+              <label className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>Size</label>
+              <input
+                value={sizeInput}
+                onChange={e => setSizeInput(e.target.value)}
+                onBlur={handleSizeBlur}
+                onKeyDown={e => e.key === 'Enter' && e.target.blur()}
+                className="text-xs font-mono rounded px-1.5 py-1"
+                style={{
+                  width: 80, border: '1px solid var(--border)',
+                  background: 'var(--bg-raised)', color: 'var(--text)',
+                  outline: 'none',
+                }}
+              />
+            </div>
+            {/* Weight select */}
+            <div className="flex flex-col gap-0.5">
+              <label className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>Weight</label>
+              <select
+                value={weight}
+                onChange={handleWeightChange}
+                className="text-xs rounded px-1.5 py-1"
+                style={{
+                  width: 72, border: '1px solid var(--border)',
+                  background: 'var(--bg-raised)', color: 'var(--text)',
+                  outline: 'none',
+                }}
+              >
+                {WEIGHTS.map(w => <option key={w} value={w}>{w}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="text-[10px] mt-2 font-mono" style={{ color: 'var(--text-faint)' }}>
+            {t.family.split(',')[0].replace(/'/g, '')}
           </div>
         </div>
+
+        {/* Live preview */}
         <div
-          className="flex-1"
-          style={{ fontFamily: t.family, fontSize: t.size, fontWeight: t.weight, color: resolveColor(t.color), background: t.color === '#ffffff' ? 'var(--sch-black)' : undefined, padding: t.color === '#ffffff' ? '4px 10px' : undefined, borderRadius: t.color === '#ffffff' ? 4 : undefined }}
+          className="flex-1 flex items-center"
+          style={{
+            fontFamily: t.family,
+            fontSize: size,
+            fontWeight: Number(weight),
+            color: resolveColor(t.color),
+            background: onDark ? 'var(--sch-black)' : undefined,
+            padding: onDark ? '6px 12px' : undefined,
+            borderRadius: onDark ? 6 : undefined,
+            minHeight: 40,
+          }}
         >
           {t.example}
         </div>
-        <div className="text-xs w-64 flex-shrink-0" style={{ color: 'var(--text-faint)' }}>{t.usage}</div>
+
+        {/* Usage */}
+        <div className="text-xs flex-shrink-0" style={{ color: 'var(--text-faint)', width: 200 }}>{t.usage}</div>
       </div>
     </div>
   )
@@ -353,18 +431,19 @@ function Section({ title, children }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function StyleGuide() {
-  // Apply any saved overrides on mount
-  useEffect(() => {
+  // Apply saved overrides synchronously before children read CSS vars
+  useState(() => {
     const saved = JSON.parse(localStorage.getItem('sg-overrides') || '{}')
     Object.entries(saved).forEach(([k, v]) => setCssVar(k, v))
-  }, [])
+  })
 
   function resetAll() {
     localStorage.removeItem('sg-overrides')
-    // Remove all inline overrides so stylesheet defaults take over
-    COLOR_TOKENS.flatMap(g => g.tokens).forEach(t => {
-      document.documentElement.style.removeProperty(t.var)
-    })
+    const allVars = [
+      ...COLOR_TOKENS.flatMap(g => g.tokens).map(t => t.var),
+      ...TYPE_TOKENS.flatMap(t => [t.sizeVar, t.weightVar]),
+    ]
+    allVars.forEach(v => document.documentElement.style.removeProperty(v))
     window.location.reload()
   }
 
