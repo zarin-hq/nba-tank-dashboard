@@ -24,7 +24,7 @@ function TeamLogo({ teamId }) {
   )
 }
 
-function Th({ children, divider = false, compact = false, className = '' }) {
+function Th({ children, divider = false, compact = false, className = '', extraStyle = {} }) {
   return (
     <th
       className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-left text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${className}`}
@@ -32,6 +32,7 @@ function Th({ children, divider = false, compact = false, className = '' }) {
         color: 'rgba(255,255,255,0.6)',
         borderLeft: divider ? '1px solid rgba(255,255,255,0.1)' : undefined,
         paddingLeft: divider ? (compact ? 6 : 12) : undefined,
+        ...extraStyle,
       }}
     >
       {children}
@@ -83,8 +84,8 @@ export default function TankTable({ data, loading, error }) {
         <table className="w-full min-w-[1300px]">
           <thead>
             <tr style={{ background: 'var(--sch-black)' }}>
-              <Th>#</Th>
-              <Th className="min-w-[160px]">Team</Th>
+              <Th extraStyle={{ width: 40, position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>#</Th>
+              <Th className="min-w-[140px]" extraStyle={{ position: 'sticky', left: 40, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
               <Th>W–L</Th>
               <Th>GB</Th>
               <Th>L10</Th>
@@ -118,11 +119,11 @@ export default function TankTable({ data, loading, error }) {
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = rowBg }}
                 >
-                  <Td extraStyle={{ ...jazzT, ...(isJazz ? { borderLeft: jb } : {}) }}>
+                  <Td extraStyle={{ ...jazzT, ...(isJazz ? { borderLeft: jb } : {}), width: 40, position: 'sticky', left: 0, zIndex: 2, background: 'inherit' }}>
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
-                  <Td extraStyle={{ ...jazzT, paddingRight: 26 }}>
+                  <Td extraStyle={{ ...jazzT, paddingRight: 26, position: 'sticky', left: 40, zIndex: 2, background: 'inherit', borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
                     <div className="flex items-center gap-2">
                       <TeamLogo teamId={team.team_id} />
                       <span className="font-semibold"

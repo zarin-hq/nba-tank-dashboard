@@ -152,7 +152,7 @@ export default function TodayGames({ data, loading, error, standings }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
       {data.map(game => <GameCard key={game.game_id} game={game} slotMap={slotMap} />)}
     </div>
   )
@@ -170,10 +170,10 @@ function GameCard({ game, slotMap }) {
   const borderColor = isJazz ? 'var(--accent)' : isTankBowl ? '#d97706' : 'var(--border)'
 
   return (
-    <div className="flex-shrink-0 w-56 overflow-hidden flex flex-col"
+    <div className="w-full sm:flex-shrink-0 sm:w-52 overflow-hidden flex flex-col"
       style={{ background: 'var(--bg-card)', border: `1px solid ${borderColor}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 16 }}>
       {/* Status row */}
-      <div className="flex items-center justify-between px-3 pt-2.5 pb-2"
+      <div className="flex items-center justify-between px-2.5 pt-2 pb-1.5 sm:px-3 sm:pt-2.5 sm:pb-2"
         style={{ borderBottom: '1px solid var(--border)' }}>
         <StatusBadge statusId={game.status_id} statusText={game.status_text} />
         <div className="flex gap-1 items-center">
@@ -222,12 +222,12 @@ function GameCard({ game, slotMap }) {
 function TeamRow({ teamId, name, record, score, lotterySlot, inBottom10, isWinning, showScore, injuries }) {
   const lastName = name.split(' ').slice(-1)[0]
   return (
-    <div className="flex items-center px-3 py-3"
+    <div className="flex items-center px-2.5 py-2 sm:px-3 sm:py-3"
       style={{ background: isWinning ? 'var(--bg-raised)' : 'transparent' }}>
       <img
         src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
         alt=""
-        style={{ width: 56, height: 56, objectFit: 'contain', flexShrink: 0 }}
+        className="w-10 h-10 sm:w-14 sm:h-14 object-contain flex-shrink-0"
         onError={e => { e.target.style.display = 'none' }}
       />
 
@@ -256,7 +256,7 @@ function TeamRow({ teamId, name, record, score, lotterySlot, inBottom10, isWinni
       </div>
 
       {showScore && score != null && (
-        <span className="text-xl font-bold tabular-nums ml-2 flex-shrink-0"
+        <span className="text-lg sm:text-xl font-bold tabular-nums ml-2 flex-shrink-0"
           style={{ color: isWinning ? 'var(--text)' : 'var(--text-faint)' }}>
           {score}
         </span>

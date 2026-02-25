@@ -255,8 +255,61 @@ export default function JazzPickOdds({ data, loading, error }) {
   return (
     <div className="overflow-hidden"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 16 }}>
-      {/* Chart + player info */}
-      <div className="px-5 py-5">
+
+      {/* Mobile vertical list — hidden on sm+ */}
+      <div className="sm:hidden px-4 py-4 space-y-3">
+        {picks.map(({ pick, pct }) => {
+          const player = bigBoard.find(p => p.rank === pick)
+          const barW = Math.round((pct / maxPct) * 100)
+          const color = barColor(pick, pct)
+          const isLottery = pick <= 4
+          return (
+            <div key={pick} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold tabular-nums flex-shrink-0"
+                  style={{ width: 22, color: 'var(--text-muted)' }}>
+                  #{pick}
+                </span>
+                {player?.photo && (
+                  <img src={player.photo} alt={player.name}
+                    className="w-6 h-6 rounded object-cover object-top flex-shrink-0"
+                    style={{ background: 'var(--bg-raised)' }}
+                    onError={e => { e.target.style.display = 'none' }}
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  {player ? (
+                    <span className="text-xs font-semibold truncate block" style={{ color: 'var(--text)' }}>
+                      {player.name}
+                      <span className="font-normal ml-1" style={{ color: 'var(--text-faint)' }}>
+                        {player.pos} · {player.school}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Pick {pick}</span>
+                  )}
+                </div>
+                <span className="text-xs font-bold tabular-nums flex-shrink-0"
+                  style={{ width: 40, textAlign: 'right', color: isLottery ? '#00CF94' : pct >= 20 ? 'var(--accent)' : 'var(--text-muted)' }}>
+                  {pct >= 0.5 ? `${pct.toFixed(1)}%` : '—'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div style={{ width: 22, flexShrink: 0 }} />
+                <div style={{ width: 24, flexShrink: 0 }} /> {/* photo spacer */}
+                <div className="flex-1 rounded-full overflow-hidden" style={{ height: 5, background: 'var(--bg-raised)' }}>
+                  <div className="h-full rounded-full"
+                    style={{ width: `${barW}%`, background: color, minWidth: pct > 0 ? 3 : 0 }} />
+                </div>
+                <div style={{ width: 40, flexShrink: 0 }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Desktop bar chart — hidden on mobile */}
+      <div className="hidden sm:block px-5 py-5">
         {/* Bar chart row */}
         <div className="flex gap-1">
           {picks.map(({ pick, pct }, idx) => {
@@ -264,7 +317,6 @@ export default function JazzPickOdds({ data, loading, error }) {
             const color = barColor(pick, pct)
             const isLotteryPick = pick <= 4
             const delay = `${idx * 30}ms`
-            const barRef = { current: null }
 
             return (
               <BarColumn
@@ -306,7 +358,6 @@ export default function JazzPickOdds({ data, loading, error }) {
             )
           })}
         </div>
-
       </div>
     </div>
   )

@@ -97,12 +97,12 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <span className="hidden sm:inline text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
               Updated {lastUpdated}
             </span>
             <button
               onClick={refetchAll}
-              className="text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wide"
+              className="hidden sm:block text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wide"
               style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
             >
               ↻ Refresh
