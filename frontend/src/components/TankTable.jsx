@@ -3,6 +3,17 @@ import { useState } from 'react'
 const JAZZ_ID = 1610612762
 const PICKS = Array.from({ length: 14 }, (_, i) => i + 1)
 
+const NBA_ABBR = {
+  1610612737: 'ATL', 1610612738: 'BOS', 1610612739: 'CLE', 1610612740: 'NOP',
+  1610612741: 'CHI', 1610612742: 'DAL', 1610612743: 'DEN', 1610612744: 'GSW',
+  1610612745: 'HOU', 1610612746: 'LAC', 1610612747: 'LAL', 1610612748: 'MIA',
+  1610612749: 'MIL', 1610612750: 'MIN', 1610612751: 'BKN', 1610612752: 'NYK',
+  1610612753: 'ORL', 1610612754: 'IND', 1610612755: 'PHI', 1610612756: 'PHX',
+  1610612757: 'POR', 1610612758: 'SAC', 1610612759: 'SAS', 1610612760: 'OKC',
+  1610612761: 'TOR', 1610612762: 'UTA', 1610612763: 'MEM', 1610612764: 'WAS',
+  1610612765: 'DET', 1610612766: 'CHA',
+}
+
 // team_id → which team receives that pick (pick is owed to them)
 const PICK_OWED_TO = {
   1610612740: 'ATL',  // New Orleans Pelicans → Atlanta Hawks
@@ -40,7 +51,7 @@ function Th({ children, divider = false, compact = false, className = '', extraS
   )
 }
 
-function Td({ children, divider = false, compact = false, wrap = false, className = '', extraStyle = {} }) {
+function Td({ children, divider = false, compact = false, wrap = false, stickyCell = false, className = '', extraStyle = {} }) {
   return (
     <td
       className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-sm ${wrap ? 'whitespace-normal' : 'whitespace-nowrap'} ${className}`}
@@ -49,6 +60,7 @@ function Td({ children, divider = false, compact = false, wrap = false, classNam
         paddingLeft: divider ? (compact ? 6 : 12) : undefined,
         ...extraStyle,
       }}
+      {...(stickyCell ? { 'data-sticky': '1' } : {})}
     >
       {children}
     </td>
@@ -107,6 +119,8 @@ export default function TankTable({ data, loading, error }) {
               const rowBg = isJazz
                 ? 'rgba(5,32,101,0.05)'
                 : isEven ? 'var(--bg-card)' : 'var(--bg-raised)'
+              // Solid background for sticky cells — transparent rowBg causes bleed-through when scrolling
+              const stickyBg = isJazz ? '#f3f4f7' : isEven ? '#ffffff' : '#f3f3f3'
               const jb = isJazz ? '1px solid var(--sch-black)' : undefined
               const jazzT = isJazz ? { borderTop: jb } : {}
 
@@ -117,19 +131,29 @@ export default function TankTable({ data, loading, error }) {
                     borderBottom: isJazz ? jb : '1px solid var(--border)',
                     transition: 'background 0.1s',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = rowBg }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--sch-smoke)'
+                    e.currentTarget.querySelectorAll('[data-sticky]').forEach(td => { td.style.background = '#eceff1' })
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = rowBg
+                    e.currentTarget.querySelectorAll('[data-sticky]').forEach(td => { td.style.background = stickyBg })
+                  }}
                 >
-                  <Td extraStyle={{ ...jazzT, ...(isJazz ? { borderLeft: jb } : {}), width: 40, position: 'sticky', left: 0, zIndex: 2, background: 'inherit' }}>
+                  <Td stickyCell extraStyle={{ ...jazzT, ...(isJazz ? { borderLeft: jb } : {}), width: 40, position: 'sticky', left: 0, zIndex: 2, background: stickyBg }}>
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
-                  <Td extraStyle={{ ...jazzT, paddingRight: 26, position: 'sticky', left: 40, zIndex: 2, background: 'inherit', borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
+                  <Td stickyCell extraStyle={{ ...jazzT, paddingRight: 26, position: 'sticky', left: 40, zIndex: 2, background: stickyBg, borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
                     <div className="flex items-center gap-2">
                       <TeamLogo teamId={team.team_id} />
-                      <span className="font-semibold"
+                      <span className="hidden sm:inline font-semibold"
                         style={{ color: isJazz ? 'var(--accent)' : 'var(--text)' }}>
                         {team.team_city} {team.team_name}
+                      </span>
+                      <span className="sm:hidden font-semibold text-xs"
+                        style={{ color: isJazz ? 'var(--accent)' : 'var(--text)' }}>
+                        {NBA_ABBR[team.team_id] ?? team.team_name}
                       </span>
                       {PICK_OWED_TO[team.team_id] && (
                         <span

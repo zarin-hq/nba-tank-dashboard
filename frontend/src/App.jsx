@@ -90,7 +90,7 @@ export default function App() {
               onAnimationEnd={() => setLogoPopped(false)}
             />
             <div>
-              <h1 className="text-2xl tracking-tight leading-none text-white"
+              <h1 className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
                 style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>
                 JAZZ TANK WATCH
               </h1>
@@ -165,7 +165,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="max-w-[1600px] mx-auto px-4 py-6 flex justify-end">
+      <footer className="hidden sm:flex max-w-[1600px] mx-auto px-4 py-6 justify-end">
         <Link to="/style-guide" className="text-xs" style={{ color: 'var(--border-med)', textDecoration: 'none' }}
           onMouseEnter={e => e.target.style.color = 'var(--text-faint)'}
           onMouseLeave={e => e.target.style.color = 'var(--border-med)'}

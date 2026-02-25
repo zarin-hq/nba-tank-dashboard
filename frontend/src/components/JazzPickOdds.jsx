@@ -241,6 +241,7 @@ export default function JazzPickOdds({ data, loading, error }) {
 
   const picks = Object.entries(data.odds)
     .map(([pick, pct]) => ({ pick: Number(pick), pct: Number(pct) }))
+    .filter(d => d.pick <= 10)
     .sort((a, b) => a.pick - b.pick)
 
   const maxPct = Math.max(...picks.map(d => d.pct), 1)
