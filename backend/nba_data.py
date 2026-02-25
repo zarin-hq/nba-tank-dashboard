@@ -3,6 +3,7 @@ NBA API wrappers with simple in-memory caching (5-minute TTL).
 """
 import time
 import httpx
+import random
 from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
@@ -48,8 +49,26 @@ def _get(key: str) -> Optional[Any]:
     return None
 
 
+def _get_stale(key: str) -> Optional[Any]:
+    """Return cached value even if expired — used as fallback when API fails."""
+    return _cache[key][0] if key in _cache else None
+
+
 def _set(key: str, data: Any) -> None:
     _cache[key] = (data, time.time())
+
+
+def _retry_nba(fn, retries=3):
+    """Call fn up to retries times with jittered backoff."""
+    for attempt in range(retries):
+        try:
+            return fn()
+        except Exception as e:
+            if attempt == retries - 1:
+                raise
+            wait = 3 * (attempt + 1) + random.uniform(0, 2)
+            print(f"[nba_api] attempt {attempt + 1} failed: {e}. Retrying in {wait:.1f}s...")
+            time.sleep(wait)
 
 
 def get_standings() -> List[Dict]:
@@ -58,36 +77,39 @@ def get_standings() -> List[Dict]:
         return cached
 
     try:
-        resp = leaguestandingsv3.LeagueStandingsV3(
-            season=CURRENT_SEASON,
-            season_type="Regular Season",
-            league_id="00",
-            headers=NBA_HEADERS,
-            timeout=30,
-        )
-        df = resp.get_data_frames()[0]
-        result = []
-        for _, row in df.iterrows():
-            result.append({
-                "team_id": int(row["TeamID"]),
-                "team_city": str(row["TeamCity"]),
-                "team_name": str(row["TeamName"]),
-                "wins": int(row["WINS"]),
-                "losses": int(row["LOSSES"]),
-                "win_pct": float(row["WinPCT"]),
-                "conference": str(row["Conference"]),
-                "conf_record": str(row["ConferenceRecord"]),
-                "home_record": str(row["HOME"]),
-                "road_record": str(row["ROAD"]),
-                "l10": str(row["L10"]),
-                "streak": str(row["strCurrentStreak"]),
-                "point_diff": float(row.get("DiffPoints_PG") or 0),
-            })
+        def _fetch():
+            resp = leaguestandingsv3.LeagueStandingsV3(
+                season=CURRENT_SEASON,
+                season_type="Regular Season",
+                league_id="00",
+                headers=NBA_HEADERS,
+                timeout=30,
+            )
+            df = resp.get_data_frames()[0]
+            result = []
+            for _, row in df.iterrows():
+                result.append({
+                    "team_id": int(row["TeamID"]),
+                    "team_city": str(row["TeamCity"]),
+                    "team_name": str(row["TeamName"]),
+                    "wins": int(row["WINS"]),
+                    "losses": int(row["LOSSES"]),
+                    "win_pct": float(row["WinPCT"]),
+                    "conference": str(row["Conference"]),
+                    "conf_record": str(row["ConferenceRecord"]),
+                    "home_record": str(row["HOME"]),
+                    "road_record": str(row["ROAD"]),
+                    "l10": str(row["L10"]),
+                    "streak": str(row["strCurrentStreak"]),
+                    "point_diff": float(row.get("DiffPoints_PG") or 0),
+                })
+            return result
+        result = _retry_nba(_fetch)
         _set("standings", result)
         return result
     except Exception as e:
         print(f"[standings] error: {e}")
-        return []
+        return _get_stale("standings") or []
 
 
 def get_advanced_stats() -> Dict[int, Dict]:
@@ -96,31 +118,34 @@ def get_advanced_stats() -> Dict[int, Dict]:
         return cached
 
     try:
-        resp = leaguedashteamstats.LeagueDashTeamStats(
-            season=CURRENT_SEASON,
-            season_type_all_star="Regular Season",
-            measure_type_detailed_defense="Advanced",
-            per_mode_detailed="PerGame",
-            headers=NBA_HEADERS,
-            timeout=30,
-        )
-        df = resp.get_data_frames()[0]
-        result = {}
-        for _, row in df.iterrows():
-            tid = int(row["TEAM_ID"])
-            result[tid] = {
-                "net_rtg": float(row.get("NET_RATING") or 0),
-                "off_rtg": float(row.get("OFF_RATING") or 0),
-                "def_rtg": float(row.get("DEF_RATING") or 0),
-                "net_rtg_rank": int(row.get("NET_RATING_RANK") or 0),
-                "off_rtg_rank": int(row.get("OFF_RATING_RANK") or 0),
-                "def_rtg_rank": int(row.get("DEF_RATING_RANK") or 0),
-            }
+        def _fetch():
+            resp = leaguedashteamstats.LeagueDashTeamStats(
+                season=CURRENT_SEASON,
+                season_type_all_star="Regular Season",
+                measure_type_detailed_defense="Advanced",
+                per_mode_detailed="PerGame",
+                headers=NBA_HEADERS,
+                timeout=30,
+            )
+            df = resp.get_data_frames()[0]
+            result = {}
+            for _, row in df.iterrows():
+                tid = int(row["TEAM_ID"])
+                result[tid] = {
+                    "net_rtg": float(row.get("NET_RATING") or 0),
+                    "off_rtg": float(row.get("OFF_RATING") or 0),
+                    "def_rtg": float(row.get("DEF_RATING") or 0),
+                    "net_rtg_rank": int(row.get("NET_RATING_RANK") or 0),
+                    "off_rtg_rank": int(row.get("OFF_RATING_RANK") or 0),
+                    "def_rtg_rank": int(row.get("DEF_RATING_RANK") or 0),
+                }
+            return result
+        result = _retry_nba(_fetch)
         _set("advanced", result)
         return result
     except Exception as e:
         print(f"[advanced_stats] error: {e}")
-        return {}
+        return _get_stale("advanced") or {}
 
 
 def get_today_games(date_str: str = None) -> List[Dict]:
@@ -132,7 +157,7 @@ def get_today_games(date_str: str = None) -> List[Dict]:
         return cached
 
     try:
-        resp = scoreboardv2.ScoreboardV2(game_date=date_str, league_id="00", headers=NBA_HEADERS, timeout=30)
+        resp = _retry_nba(lambda: scoreboardv2.ScoreboardV2(game_date=date_str, league_id="00", headers=NBA_HEADERS, timeout=30))
         games_df = resp.game_header.get_data_frame()
         linescore_df = resp.line_score.get_data_frame()
 
@@ -167,7 +192,7 @@ def get_today_games(date_str: str = None) -> List[Dict]:
         return games
     except Exception as e:
         print(f"[today_games] error: {e}")
-        return []
+        return _get_stale(cache_key) or []
 
 
 def get_remaining_sos() -> Dict[int, float]:
@@ -210,7 +235,7 @@ def get_remaining_sos() -> Dict[int, float]:
         return sos
     except Exception as e:
         print(f"[sos] error: {e}")
-        return {}
+        return _get_stale("sos") or {}
 
 
 def get_injuries_for_games(nba_team_ids: List[int], date_str: str = None) -> Dict[int, List[Dict]]:

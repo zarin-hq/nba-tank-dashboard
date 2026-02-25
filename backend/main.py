@@ -69,15 +69,15 @@ executor = ThreadPoolExecutor(max_workers=4)
 
 JAZZ_TEAM_ID = 1610612762
 
-# Lottery simulation is expensive — compute once at startup and cache
+# Lottery simulation — compute once at startup and cache
 _lottery_results = None
 
 
 def _get_lottery():
     global _lottery_results
     if _lottery_results is None:
-        print("Running lottery simulation (100k iterations)...")
-        _lottery_results = run_simulation(100_000)
+        print("Running lottery simulation (10k iterations)...")
+        _lottery_results = run_simulation(10_000)
         print("Lottery simulation complete.")
     return _lottery_results
 
@@ -85,6 +85,53 @@ def _get_lottery():
 def _run(fn, *args):
     """Run a blocking NBA API call in a thread pool."""
     return asyncio.get_event_loop().run_in_executor(executor, fn, *args)
+
+
+# ---------------------------------------------------------------------------
+# Background pre-warm: fetch all NBA data at startup, retry until it works
+# ---------------------------------------------------------------------------
+
+@app.on_event("startup")
+async def startup():
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(executor, _get_lottery)
+    asyncio.create_task(_pre_warm())
+
+
+async def _pre_warm():
+    loop = asyncio.get_event_loop()
+    while True:
+        try:
+            standings = await loop.run_in_executor(executor, get_standings)
+            if standings:
+                await asyncio.gather(
+                    loop.run_in_executor(executor, get_advanced_stats),
+                    loop.run_in_executor(executor, get_remaining_sos),
+                )
+                print(f"[startup] pre-warm complete: {len(standings)} teams loaded")
+                asyncio.create_task(_refresh_loop())
+                return
+            else:
+                print("[startup] standings empty, retrying in 30s...")
+        except Exception as e:
+            print(f"[startup] pre-warm error: {e}, retrying in 30s...")
+        await asyncio.sleep(30)
+
+
+async def _refresh_loop():
+    """Re-fetch NBA data every 5 minutes so cache stays warm."""
+    while True:
+        await asyncio.sleep(300)
+        try:
+            loop = asyncio.get_event_loop()
+            await asyncio.gather(
+                loop.run_in_executor(executor, get_standings),
+                loop.run_in_executor(executor, get_advanced_stats),
+                loop.run_in_executor(executor, get_remaining_sos),
+            )
+            print("[refresh] standings updated")
+        except Exception as e:
+            print(f"[refresh] error: {e}")
 
 
 def _sort_lottery(standings):
