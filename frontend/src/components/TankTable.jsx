@@ -99,7 +99,7 @@ export default function TankTable({ data, loading, error }) {
           <thead>
             <tr style={{ background: 'var(--sch-black)' }}>
               <Th extraStyle={{ width: 40, position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>#</Th>
-              <Th className="min-w-[140px]" extraStyle={{ position: 'sticky', left: 40, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
+              <Th className="min-w-[140px]" extraStyle={{ position: 'sticky', left: 38, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
               <Th>W–L</Th>
               <Th>GB</Th>
               <Th>L10</Th>
@@ -153,7 +153,7 @@ export default function TankTable({ data, loading, error }) {
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
-                  <Td stickyCell extraStyle={{ ...jazzT, paddingRight: 26, position: 'sticky', left: 40, zIndex: 2, background: stickyBg, borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
+                  <Td stickyCell extraStyle={{ ...jazzT, paddingRight: 26, position: 'sticky', left: 38, zIndex: 2, background: stickyBg, borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
                     <div className="flex items-center gap-2">
                       <TeamLogo teamId={team.team_id} />
                       <span className="hidden sm:inline font-semibold"
@@ -166,7 +166,7 @@ export default function TankTable({ data, loading, error }) {
                       </span>
                       {PICK_OWED_TO[team.team_id] && (
                         <span
-                          className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                          className="hidden sm:inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
                           style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--text-muted)' }}
                           title={`This pick is owed to ${PICK_OWED_TO[team.team_id]}`}
                         >
