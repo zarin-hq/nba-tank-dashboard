@@ -55,12 +55,9 @@ DRAFT_HISTORY = {
     14: {2015:"Cameron Payne",       2016:"Denzel Valentine", 2017:"Bam Adebayo",       2018:"Michael Porter Jr.", 2019:"Romeo Langford",  2020:"Aaron Nesmith",   2021:"Moses Moody",     2022:"Ochai Agbaji",      2023:"Jordan Hawkins",    2024:"Bub Carrington"},
 }
 
-_default_origins = "http://localhost:5173,http://localhost:3000,http://localhost:5174"
-_allowed_origins = os.environ.get("ALLOWED_ORIGINS", _default_origins).split(",")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_allowed_origins,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
