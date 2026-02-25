@@ -185,10 +185,6 @@ function GameCard({ game, slotMap }) {
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
               style={{ background: 'rgba(5,32,101,0.08)', color: 'var(--accent)' }}>JAZZ</span>
           )}
-          {game.national_tv && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded"
-              style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)' }}>{game.national_tv}</span>
-          )}
         </div>
       </div>
 
