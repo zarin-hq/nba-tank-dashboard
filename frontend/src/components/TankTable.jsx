@@ -105,23 +105,24 @@ export default function TankTable({ data, loading, error }) {
               const rowBg = isJazz
                 ? 'rgba(5,32,101,0.05)'
                 : isEven ? 'var(--bg-card)' : 'var(--bg-raised)'
+              const jb = isJazz ? '1px solid var(--sch-black)' : undefined
+              const jazzT = isJazz ? { borderTop: jb } : {}
 
               return (
                 <tr key={team.team_id}
                   style={{
                     background: rowBg,
-                    borderTop: isJazz ? '1px solid var(--sch-black)' : undefined,
-                    borderBottom: isJazz ? '1px solid var(--sch-black)' : '1px solid var(--border)',
+                    borderBottom: isJazz ? jb : '1px solid var(--border)',
                     transition: 'background 0.1s',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = rowBg }}
                 >
-                  <Td extraStyle={isJazz ? { borderLeft: '1px solid var(--sch-black)' } : {}}>
+                  <Td extraStyle={{ ...jazzT, ...(isJazz ? { borderLeft: jb } : {}) }}>
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
-                  <Td extraStyle={{ paddingRight: 26 }}>
+                  <Td extraStyle={{ ...jazzT, paddingRight: 26 }}>
                     <div className="flex items-center gap-2">
                       <TeamLogo teamId={team.team_id} />
                       <span className="font-semibold"
@@ -140,13 +141,13 @@ export default function TankTable({ data, loading, error }) {
                     </div>
                   </Td>
 
-                  <Td>
+                  <Td extraStyle={jazzT}>
                     <span className="font-mono" style={{ color: 'var(--text)' }}>
                       {team.wins}–{team.losses}
                     </span>
                   </Td>
 
-                  <Td>
+                  <Td extraStyle={jazzT}>
                     <span className="font-mono" style={{ color: 'var(--text)' }}>
                       {team.gb === 0
                         ? <span style={{ fontWeight: 700 }}>—</span>
@@ -154,29 +155,29 @@ export default function TankTable({ data, loading, error }) {
                     </span>
                   </Td>
 
-                  <Td><span style={{ color: 'var(--text)' }}>{team.l10 || '—'}</span></Td>
+                  <Td extraStyle={jazzT}><span style={{ color: 'var(--text)' }}>{team.l10 || '—'}</span></Td>
 
-                  <Td>
+                  <Td extraStyle={jazzT}>
                     <span style={{ color: team.streak ? (team.streak.startsWith('W') ? '#16a34a' : '#dc2626') : 'var(--text)' }}>
                       {team.streak || '—'}
                     </span>
                   </Td>
 
-                  <Td>
+                  <Td extraStyle={jazzT}>
                     <span style={{ color: 'var(--text)' }}>
                       {team.net_rtg != null ? (team.net_rtg > 0 ? '+' : '') + fmt(team.net_rtg) : '—'}
                     </span>
                   </Td>
 
-                  <Td><span className="font-mono" style={{ color: 'var(--text)' }}>
+                  <Td extraStyle={jazzT}><span className="font-mono" style={{ color: 'var(--text)' }}>
                     {team.off_rtg_rank ? <span title={`OFF: ${fmt(team.off_rtg)}`}>#{team.off_rtg_rank}</span> : '—'}
                   </span></Td>
 
-                  <Td><span className="font-mono" style={{ color: 'var(--text)' }}>
+                  <Td extraStyle={jazzT}><span className="font-mono" style={{ color: 'var(--text)' }}>
                     {team.def_rtg_rank ? <span title={`DEF: ${fmt(team.def_rtg)}`}>#{team.def_rtg_rank}</span> : '—'}
                   </span></Td>
 
-                  <Td>
+                  <Td extraStyle={jazzT}>
                     {team.sos != null
                       ? <span className="font-mono" style={{ color: team.sos > 0.5 ? '#dc2626' : 'var(--accent-2)' }}>
                           .{String(Math.round(team.sos * 1000)).padStart(3, '0')}
@@ -184,7 +185,7 @@ export default function TankTable({ data, loading, error }) {
                       : <span style={{ color: 'var(--text-faint)' }}>—</span>}
                   </Td>
 
-                  <Td>
+                  <Td extraStyle={jazzT}>
                     <span className="font-bold" style={{ color: 'var(--text)' }}>
                       {team.top4_odds != null ? `${fmt(team.top4_odds)}%` : '—'}
                     </span>
@@ -192,7 +193,7 @@ export default function TankTable({ data, loading, error }) {
 
                   {PICKS.map((p, idx) => (
                     <Td key={p} divider={idx === 0} compact
-                      extraStyle={isJazz && idx === PICKS.length - 1 ? { borderRight: '1px solid var(--sch-black)' } : {}}>
+                      extraStyle={{ ...jazzT, ...(isJazz && idx === PICKS.length - 1 ? { borderRight: jb } : {}) }}>
                       <OddsCell pct={team.pick_odds?.[String(p)]} />
                     </Td>
                   ))}
