@@ -35,10 +35,11 @@ function TeamLogo({ teamId }) {
   )
 }
 
-function Th({ children, divider = false, compact = false, className = '', extraStyle = {} }) {
+function Th({ children, divider = false, compact = false, className = '', extraStyle = {}, onClick }) {
   return (
     <th
-      className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-left text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${className}`}
+      onClick={onClick}
+      className={`${compact ? 'px-1.5 py-2' : 'px-2.5 py-2'} text-left text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${onClick ? 'cursor-pointer select-none' : ''} ${className}`}
       style={{
         color: 'rgba(255,255,255,0.6)',
         borderLeft: divider ? '1px solid rgba(255,255,255,0.1)' : undefined,
@@ -69,6 +70,7 @@ function Td({ children, divider = false, compact = false, wrap = false, stickyCe
 
 export default function TankTable({ data, loading, error }) {
   const [showAll, setShowAll] = useState(false)
+  const [showPicks, setShowPicks] = useState(false)
 
   if (loading) return (
     <div className="overflow-hidden"
@@ -93,7 +95,7 @@ export default function TankTable({ data, loading, error }) {
     <div className="overflow-hidden"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 16 }}>
       <div className="overflow-x-auto scrollbar-thin">
-        <table className="w-full min-w-[1300px]">
+        <table className={`w-full ${showPicks ? 'min-w-[1350px]' : 'min-w-[860px]'}`}>
           <thead>
             <tr style={{ background: 'var(--sch-black)' }}>
               <Th extraStyle={{ width: 40, position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>#</Th>
@@ -106,10 +108,17 @@ export default function TankTable({ data, loading, error }) {
               <Th>OFF</Th>
               <Th>DEF</Th>
               <Th>REM SOS</Th>
-              <Th className="min-w-[72px]">VS B6</Th>
-              <Th>TOP 4%</Th>
-              <Th divider compact>P1</Th>
-              {PICKS.slice(1).map(p => <Th key={p} compact>P{p}</Th>)}
+              <Th onClick={() => setShowPicks(p => !p)}>
+                <span className="flex items-center gap-1">
+                  TOP 4%
+                  <span style={{ fontSize: 9, opacity: 0.5, letterSpacing: 0 }}>
+                    {showPicks ? '‹‹' : '››'}
+                  </span>
+                </span>
+              </Th>
+              <Th className="min-w-[120px]">VS B6</Th>
+              {showPicks && <Th divider compact>P1</Th>}
+              {showPicks && PICKS.slice(1).map(p => <Th key={p} compact>P{p}</Th>)}
             </tr>
           </thead>
           <tbody>
@@ -211,7 +220,13 @@ export default function TankTable({ data, loading, error }) {
                       : <span style={{ color: 'var(--text-faint)' }}>—</span>}
                   </Td>
 
-                  <Td wrap extraStyle={{ ...jazzT, minWidth: 72, lineHeight: 1.6 }}>
+                  <Td extraStyle={jazzT}>
+                    <span className="font-bold" style={{ color: 'var(--text)' }}>
+                      {team.top4_odds != null ? `${fmt(team.top4_odds)}%` : '—'}
+                    </span>
+                  </Td>
+
+                  <Td extraStyle={{ ...jazzT, minWidth: 120 }}>
                     {(team.vs_bottom6 || []).length === 0
                       ? <span style={{ color: 'var(--text-faint)' }}>—</span>
                       : (team.vs_bottom6).map((g, i) => (
@@ -225,13 +240,7 @@ export default function TankTable({ data, loading, error }) {
                     }
                   </Td>
 
-                  <Td extraStyle={jazzT}>
-                    <span className="font-bold" style={{ color: 'var(--text)' }}>
-                      {team.top4_odds != null ? `${fmt(team.top4_odds)}%` : '—'}
-                    </span>
-                  </Td>
-
-                  {PICKS.map((p, idx) => (
+                  {showPicks && PICKS.map((p, idx) => (
                     <Td key={p} divider={idx === 0} compact
                       extraStyle={{ ...jazzT, ...(isJazz && idx === PICKS.length - 1 ? { borderRight: jb } : {}) }}>
                       <OddsCell pct={team.pick_odds?.[String(p)]} />
