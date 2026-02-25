@@ -143,6 +143,11 @@ def _calc_gb(worst, team):
     )
 
 
+@app.get("/")
+async def health():
+    return {"status": "ok", "service": "nba-tank-dashboard"}
+
+
 @app.get("/api/standings")
 async def standings_endpoint():
     loop = asyncio.get_event_loop()
