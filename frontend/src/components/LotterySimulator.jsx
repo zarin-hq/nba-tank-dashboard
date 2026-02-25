@@ -146,6 +146,7 @@ export default function LotterySimulator() {
   const [revealed, setRevealed] = useState(new Set())
   const [running, setRunning] = useState(false)
   const [done, setDone] = useState(false)
+  const [jazzFirst, setJazzFirst] = useState(false)
   const timers = useRef([])
 
   function clearTimers() {
@@ -157,12 +158,14 @@ export default function LotterySimulator() {
     clearTimers()
     setRevealed(new Set())
     setDone(false)
+    setJazzFirst(false)
     setRunning(true)
     try {
       const data = await fetch(apiUrl('/api/sim-lottery')).then(r => r.json())
       setResults(data)
       const jazzEntry = data.find(r => r.team_id === JAZZ_ID)
       const jazzIsTop4 = jazzEntry && jazzEntry.pick <= 4
+      const jazzGetsOne = jazzEntry && jazzEntry.pick === 1
       let delay = 300
       REVEAL_SEQUENCE.forEach(pick => {
         delay += pick <= 4 ? 850 : 160
@@ -170,6 +173,7 @@ export default function LotterySimulator() {
           setRevealed(prev => new Set([...prev, pick]))
           if (pick === 1) { setRunning(false); setDone(true) }
           if (jazzIsTop4 && jazzEntry.pick === pick) launchConfetti()
+          if (jazzGetsOne && pick === 1) setJazzFirst(true)
         }, delay)
         timers.current.push(t)
       })
@@ -183,6 +187,7 @@ export default function LotterySimulator() {
     setResults(null)
     setRevealed(new Set())
     setDone(false)
+    setJazzFirst(false)
     clearTimers()
     runLottery()
   }
@@ -241,13 +246,8 @@ export default function LotterySimulator() {
               className="flex items-center justify-between px-5 py-4 flex-shrink-0"
               style={{ background: 'var(--sch-black)', borderBottom: '3px solid #00FFB6' }}
             >
-              <div>
-                <div className="text-white text-base tracking-tight" style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>
-                  2026 Draft Lottery
-                </div>
-                <div className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Monte Carlo · 2019+ NBA rules
-                </div>
+              <div className="text-white text-base tracking-tight" style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>
+                2026 Draft Lottery Simulation
               </div>
               <button
                 onClick={handleClose}
@@ -302,6 +302,40 @@ export default function LotterySimulator() {
                 {running ? 'Simulating…' : 'Run Again'}
               </button>
             </div>
+
+            {/* Jazz #1 gif overlay */}
+            {jazzFirst && (
+              <div
+                onClick={() => setJazzFirst(false)}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.82)',
+                  borderRadius: 16,
+                  cursor: 'pointer',
+                  zIndex: 10,
+                }}
+              >
+                <img
+                  src="/jazz-win.gif"
+                  alt="Jazz #1 pick!"
+                  style={{ width: 260, borderRadius: 8, display: 'block' }}
+                />
+                <div
+                  className="text-white font-bold mt-4 text-lg tracking-tight"
+                  style={{ fontFamily: "'Archivo Black', Arial, sans-serif", color: '#00FFB6' }}
+                >
+                  #1 PICK!!
+                </div>
+                <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  click to dismiss
+                </div>
+              </div>
+            )}
           </div>
         </>,
         document.body

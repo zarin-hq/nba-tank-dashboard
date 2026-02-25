@@ -101,10 +101,8 @@ export default function App() {
             </span>
             <button
               onClick={refetchAll}
-              className="text-sm font-semibold px-4 py-1.5 rounded uppercase tracking-wide transition-colors"
-              style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none' }}
-              onMouseEnter={e => e.target.style.background = '#00ffb6'}
-              onMouseLeave={e => e.target.style.background = 'var(--sch-teal-bright)'}
+              className="text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wide"
+              style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
             >
               ↻ Refresh
             </button>

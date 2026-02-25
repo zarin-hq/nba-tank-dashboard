@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 const JAZZ_ID = 1610612762
 const PICKS = Array.from({ length: 14 }, (_, i) => i + 1)
 
@@ -53,6 +55,8 @@ function Td({ children, divider = false, compact = false, className = '', extraS
 }
 
 export default function TankTable({ data, loading, error }) {
+  const [showAll, setShowAll] = useState(false)
+
   if (loading) return (
     <div className="overflow-hidden"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16 }}>
@@ -95,7 +99,7 @@ export default function TankTable({ data, loading, error }) {
             </tr>
           </thead>
           <tbody>
-            {data.map((team, i) => {
+            {(showAll ? data : data.slice(0, 10)).map((team, i) => {
               const isJazz = team.team_id === JAZZ_ID
               const isEven = i % 2 === 0
               const rowBg = isJazz
@@ -113,7 +117,7 @@ export default function TankTable({ data, loading, error }) {
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = rowBg }}
                 >
-                  <Td extraStyle={isJazz ? { borderLeft: '2px solid var(--sch-black)' } : {}}>
+                  <Td extraStyle={isJazz ? { borderLeft: '3px solid var(--sch-black)' } : {}}>
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
@@ -127,7 +131,7 @@ export default function TankTable({ data, loading, error }) {
                       {PICK_OWED_TO[team.team_id] && (
                         <span
                           className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                          style={{ background: 'rgba(220,38,38,0.08)', color: '#dc2626' }}
+                          style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--text-muted)' }}
                           title={`This pick is owed to ${PICK_OWED_TO[team.team_id]}`}
                         >
                           → {PICK_OWED_TO[team.team_id]}
@@ -188,7 +192,7 @@ export default function TankTable({ data, loading, error }) {
 
                   {PICKS.map((p, idx) => (
                     <Td key={p} divider={idx === 0} compact
-                      extraStyle={isJazz && idx === PICKS.length - 1 ? { borderRight: '2px solid var(--sch-black)' } : {}}>
+                      extraStyle={isJazz && idx === PICKS.length - 1 ? { borderRight: '3px solid var(--sch-black)' } : {}}>
                       <OddsCell pct={team.pick_odds?.[String(p)]} />
                     </Td>
                   ))}
@@ -198,9 +202,17 @@ export default function TankTable({ data, loading, error }) {
           </tbody>
         </table>
       </div>
-      <div className="px-4 py-2 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)' }}>
-        GB = games behind lottery leader · OFF/DEF = league rank · P1–P14 = % chance at each pick (Monte Carlo simulation)
-      </div>
+      {!showAll && data.length > 10 && (
+        <div className="flex justify-center py-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <button
+            onClick={() => setShowAll(true)}
+            className="text-xs font-bold px-4 py-1.5 rounded uppercase tracking-wide"
+            style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}
+          >
+            See more
+          </button>
+        </div>
+      )}
     </div>
   )
 }

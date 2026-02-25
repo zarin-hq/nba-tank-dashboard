@@ -21,15 +21,18 @@ function useDraftHistory() {
 }
 
 // Generic hover tooltip that portals to document.body
-function HoverTooltip({ triggerRef, content, align = 'center', placement = 'below' }) {
+function HoverTooltip({ triggerRef, content, align = 'center', placement = 'below', clickable = false }) {
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const tooltipW = 188
+  const tooltipRef = useRef(null)
+  const hideTimer = useRef(null)
 
   useEffect(() => {
     const el = triggerRef.current
     if (!el) return
     function show() {
+      clearTimeout(hideTimer.current)
       const rect = el.getBoundingClientRect()
       let left
       if (align === 'center') {
@@ -47,16 +50,42 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
       setPos({ top, left, above })
       setVisible(true)
     }
-    function hide() { setVisible(false) }
+    function scheduleHide() {
+      if (clickable) {
+        hideTimer.current = setTimeout(() => setVisible(false), 200)
+      } else {
+        setVisible(false)
+      }
+    }
     el.addEventListener('mouseenter', show)
-    el.addEventListener('mouseleave', hide)
-    return () => { el.removeEventListener('mouseenter', show); el.removeEventListener('mouseleave', hide) }
-  }, [triggerRef, align, placement])
+    el.addEventListener('mouseleave', scheduleHide)
+    return () => {
+      el.removeEventListener('mouseenter', show)
+      el.removeEventListener('mouseleave', scheduleHide)
+      clearTimeout(hideTimer.current)
+    }
+  }, [triggerRef, align, placement, clickable])
+
+  // For clickable tooltips, keep open while hovering over tooltip itself
+  useEffect(() => {
+    if (!clickable || !visible) return
+    const el = tooltipRef.current
+    if (!el) return
+    function cancelHide() { clearTimeout(hideTimer.current) }
+    function scheduleHide() { hideTimer.current = setTimeout(() => setVisible(false), 200) }
+    el.addEventListener('mouseenter', cancelHide)
+    el.addEventListener('mouseleave', scheduleHide)
+    return () => {
+      el.removeEventListener('mouseenter', cancelHide)
+      el.removeEventListener('mouseleave', scheduleHide)
+    }
+  }, [clickable, visible])
 
   if (!visible) return null
 
   return createPortal(
     <div
+      ref={tooltipRef}
       style={{
         position: 'absolute',
         top: pos.top,
@@ -69,7 +98,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.13)',
         transform: pos.above ? 'translateY(-100%) translateY(-12px)' : undefined,
-        pointerEvents: 'none',
+        pointerEvents: clickable ? 'auto' : 'none',
       }}
     >
       {content}
@@ -99,6 +128,19 @@ function PlayerStatsContent({ player }) {
           </div>
         ))}
       </div>
+      {player.bref_url && (
+        <div className="px-3 pb-2.5" style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+          <a
+            href={player.bref_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-semibold"
+            style={{ color: 'var(--accent-2)', textDecoration: 'underline' }}
+          >
+            Basketball Reference ↗
+          </a>
+        </div>
+      )}
     </>
   )
 }
@@ -172,6 +214,7 @@ function PlayerPhoto({ player }) {
           content={<PlayerStatsContent player={player} />}
           align="center"
           placement="above"
+          clickable={!!player?.bref_url}
         />
       )}
     </div>
@@ -245,7 +288,7 @@ export default function JazzPickOdds({ data, loading, error }) {
         <div className="flex gap-1">
           {picks.map(({ pick }) => (
             <div key={pick} className="flex-1 flex flex-col items-center min-w-0">
-              <div className="mt-1.5 text-[11px] font-semibold tabular-nums" style={{ color: 'var(--text)' }}>
+              <div className="mt-1.5 text-sm font-bold tabular-nums" style={{ color: 'var(--text)' }}>
                 #{pick}
               </div>
             </div>
@@ -264,10 +307,6 @@ export default function JazzPickOdds({ data, loading, error }) {
           })}
         </div>
 
-        {/* Source label */}
-        <div className="text-xs mt-4" style={{ color: 'var(--text-faint)' }}>
-          2026 big board · tankathon.com
-        </div>
       </div>
     </div>
   )
