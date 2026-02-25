@@ -147,6 +147,7 @@ export default function LotterySimulator() {
   const [running, setRunning] = useState(false)
   const [done, setDone] = useState(false)
   const [jazzFirst, setJazzFirst] = useState(false)
+  const [jazzToOkc, setJazzToOkc] = useState(false)
   const timers = useRef([])
 
   function clearTimers() {
@@ -159,6 +160,7 @@ export default function LotterySimulator() {
     setRevealed(new Set())
     setDone(false)
     setJazzFirst(false)
+    setJazzToOkc(false)
     setRunning(true)
     try {
       const data = await fetch(apiUrl('/api/sim-lottery')).then(r => r.json())
@@ -166,14 +168,16 @@ export default function LotterySimulator() {
       const jazzEntry = data.find(r => r.team_id === JAZZ_ID)
       const jazzIsTop4 = jazzEntry && jazzEntry.pick <= 4
       const jazzGetsOne = jazzEntry && jazzEntry.pick === 1
-      let delay = 300
+      const jazzDrops = jazzEntry && (jazzEntry.pick === 9 || jazzEntry.pick === 10)
+      let delay = 150
       REVEAL_SEQUENCE.forEach(pick => {
-        delay += pick <= 4 ? 850 : 160
+        delay += pick <= 4 ? 500 : 90
         const t = setTimeout(() => {
           setRevealed(prev => new Set([...prev, pick]))
           if (pick === 1) { setRunning(false); setDone(true) }
           if (jazzIsTop4 && jazzEntry.pick === pick) launchConfetti()
           if (jazzGetsOne && pick === 1) setJazzFirst(true)
+          if (jazzDrops && jazzEntry.pick === pick) setJazzToOkc(true)
         }, delay)
         timers.current.push(t)
       })
@@ -188,6 +192,7 @@ export default function LotterySimulator() {
     setRevealed(new Set())
     setDone(false)
     setJazzFirst(false)
+    setJazzToOkc(false)
     clearTimers()
     runLottery()
   }
@@ -302,6 +307,40 @@ export default function LotterySimulator() {
                 {running ? 'Simulating…' : 'Run Again'}
               </button>
             </div>
+
+            {/* Jazz → OKC gif overlay */}
+            {jazzToOkc && (
+              <div
+                onClick={() => setJazzToOkc(false)}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.82)',
+                  borderRadius: 16,
+                  cursor: 'pointer',
+                  zIndex: 10,
+                }}
+              >
+                <img
+                  src="/jazz-okc.gif"
+                  alt="Pick goes to OKC"
+                  style={{ width: 280, borderRadius: 8, display: 'block' }}
+                />
+                <div
+                  className="font-bold mt-4 text-lg tracking-tight"
+                  style={{ fontFamily: "'Archivo Black', Arial, sans-serif", color: '#ef4444' }}
+                >
+                  PICK GOES TO OKC
+                </div>
+                <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  click to dismiss
+                </div>
+              </div>
+            )}
 
             {/* Jazz #1 gif overlay */}
             {jazzFirst && (
