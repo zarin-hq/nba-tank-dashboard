@@ -159,14 +159,13 @@ export default function TodayGames({ data, loading, error, standings }) {
 
 function GameCard({ game, slotMap }) {
   const isJazz = game.home_team_id === JAZZ_ID || game.away_team_id === JAZZ_ID
-  const isTankBowl = game.both_bottom10
   const isLive = game.status_id === 2
   const isFinal = game.status_id === 3
   const hasScore = game.home_score != null && game.away_score != null
   const homeWin = hasScore && game.home_score > game.away_score
   const awayWin = hasScore && game.away_score > game.home_score
 
-  const borderColor = isJazz ? 'var(--accent)' : isTankBowl ? '#d97706' : 'var(--border)'
+  const borderColor = isJazz ? 'var(--accent)' : 'var(--border)'
 
   return (
     <div className="w-full sm:flex-shrink-0 sm:w-[256px] overflow-hidden flex flex-col"
@@ -176,10 +175,6 @@ function GameCard({ game, slotMap }) {
         style={{ borderBottom: '1px solid var(--border)' }}>
         <StatusBadge statusId={game.status_id} statusText={game.status_text} />
         <div className="flex gap-1 items-center">
-          {isTankBowl && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(217,119,6,0.12)', color: '#b45309' }}>TANK BOWL</span>
-          )}
           {isJazz && (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
               style={{ background: 'rgba(5,32,101,0.08)', color: 'var(--accent)' }}>JAZZ</span>

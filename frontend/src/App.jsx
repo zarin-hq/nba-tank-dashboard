@@ -97,7 +97,7 @@ export default function App() {
             <div>
               <h1 className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
                 style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>
-                Jazz Tank Watch
+                Jazz Lottery Watch
               </h1>
             </div>
           </div>
