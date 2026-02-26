@@ -144,7 +144,7 @@ export default function App() {
                 className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold transition-colors"
                 style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-raised)'
+                onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-raised)'}
               >›</button>
             </div>
           </div>
