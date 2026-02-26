@@ -8,14 +8,18 @@ import LotterySimulator from './components/LotterySimulator'
 
 const JAZZ_ID = 1610612762
 
+const MT = 'America/Denver'
+
 function toDateStr(d) {
-  return d.toISOString().split('T')[0]
+  // Extract the calendar date in Mountain Time
+  return d.toLocaleDateString('en-CA', { timeZone: MT })
 }
 
 function offsetDate(dateStr, days) {
-  const d = new Date(dateStr + 'T12:00:00')
-  d.setDate(d.getDate() + days)
-  return toDateStr(d)
+  // Parse as UTC noon (avoids DST/tz ambiguity) then shift by days
+  const [y, m, day] = dateStr.split('-').map(Number)
+  const ms = Date.UTC(y, m - 1, day, 12, 0, 0) + days * 86_400_000
+  return toDateStr(new Date(ms))
 }
 
 function formatDateLabel(dateStr) {
@@ -23,8 +27,9 @@ function formatDateLabel(dateStr) {
   if (dateStr === today) return 'Today'
   if (dateStr === offsetDate(today, -1)) return 'Yesterday'
   if (dateStr === offsetDate(today, 1)) return 'Tomorrow'
-  const d = new Date(dateStr + 'T12:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const [y, m, day] = dateStr.split('-').map(Number)
+  const d = new Date(Date.UTC(y, m - 1, day, 12, 0, 0))
+  return d.toLocaleDateString('en-US', { timeZone: MT, month: 'short', day: 'numeric' })
 }
 
 function useApi(url) {
