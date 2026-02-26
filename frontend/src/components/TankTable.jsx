@@ -126,7 +126,7 @@ export default function TankTable({ data, loading, error }) {
           <thead>
             <tr style={{ background: 'var(--sch-black)' }}>
               <Th extraStyle={{ width: 40, position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>#</Th>
-              <Th extraStyle={{ position: 'sticky', left: 38, zIndex: 3, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
+              <Th extraStyle={{ position: 'sticky', left: 38, zIndex: 3, minWidth: 90, background: 'var(--sch-black)', borderRight: '1px solid rgba(255,255,255,0.1)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.25)' }}>Team</Th>
               <Th>W–L</Th>
               <Th tooltip="Games Behind">GB</Th>
               <Th>L10</Th>
@@ -180,7 +180,7 @@ export default function TankTable({ data, loading, error }) {
                     <span style={{ color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{team.lottery_slot}</span>
                   </Td>
 
-                  <Td stickyCell extraStyle={{ ...jazzT, paddingRight: 12, position: 'sticky', left: 38, zIndex: 2, background: stickyBg, borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
+                  <Td stickyCell extraStyle={{ ...jazzT, paddingRight: 12, position: 'sticky', left: 38, zIndex: 2, minWidth: 90, background: stickyBg, borderRight: '1px solid var(--border)', boxShadow: '4px 0 8px -2px rgba(0,0,0,0.07)' }}>
                     <div className="flex items-center gap-2">
                       <TeamLogo teamId={team.team_id} />
                       <span className="hidden sm:inline font-semibold"

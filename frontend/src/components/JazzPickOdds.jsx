@@ -23,12 +23,26 @@ function useDraftHistory() {
 // Generic hover tooltip that portals to document.body
 function HoverTooltip({ triggerRef, content, align = 'center', placement = 'below', clickable = false }) {
   const [visible, setVisible] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const tooltipW = 188
   const tooltipRef = useRef(null)
   const hideTimer = useRef(null)
   const visibleRef = useRef(false)
   useEffect(() => { visibleRef.current = visible }, [visible])
+
+  // Animate in: mount first, then set visible on next frame
+  // Animate out: set invisible first, then unmount after transition
+  const unmountTimer = useRef(null)
+  useEffect(() => {
+    clearTimeout(unmountTimer.current)
+    if (visible) {
+      setMounted(true)
+    } else {
+      unmountTimer.current = setTimeout(() => setMounted(false), 120)
+    }
+    return () => clearTimeout(unmountTimer.current)
+  }, [visible])
 
   useEffect(() => {
     const el = triggerRef.current
@@ -54,7 +68,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
     }
     function scheduleHide() {
       if (clickable) {
-        hideTimer.current = setTimeout(() => setVisible(false), 200)
+        hideTimer.current = setTimeout(() => setVisible(false), 80)
       } else {
         setVisible(false)
       }
@@ -79,7 +93,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
     const el = tooltipRef.current
     if (!el) return
     function cancelHide() { clearTimeout(hideTimer.current) }
-    function scheduleHide() { hideTimer.current = setTimeout(() => setVisible(false), 200) }
+    function scheduleHide() { hideTimer.current = setTimeout(() => setVisible(false), 80) }
     el.addEventListener('mouseenter', cancelHide)
     el.addEventListener('mouseleave', scheduleHide)
     return () => {
@@ -100,7 +114,10 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
     return () => { clearTimeout(t); document.removeEventListener('touchstart', dismiss) }
   }, [visible, triggerRef])
 
-  if (!visible) return null
+  if (!mounted) return null
+
+  const baseTransform = pos.above ? 'translateY(-100%) translateY(-12px)' : ''
+  const slideOffset = pos.above ? 'translateY(6px)' : 'translateY(-6px)'
 
   return createPortal(
     <div
@@ -116,7 +133,11 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
         borderRadius: 8,
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.13)',
-        transform: pos.above ? 'translateY(-100%) translateY(-12px)' : undefined,
+        transform: visible ? baseTransform : `${baseTransform} ${slideOffset}`,
+        opacity: visible ? 1 : 0,
+        transition: visible
+          ? 'opacity 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          : 'opacity 0.12s ease, transform 0.12s ease',
         pointerEvents: clickable ? 'auto' : 'none',
       }}
     >
@@ -204,14 +225,14 @@ function PlayerPhoto({ player }) {
         <img
           src={player.photo}
           alt={player?.name}
-          className="rounded object-cover object-top flex-shrink-0"
-          style={{ width: 48, height: 48, background: 'var(--bg-raised)' }}
+          className="rounded-full object-cover object-top flex-shrink-0"
+          style={{ width: 48, height: 48, background: 'var(--bg-raised)', border: '1px solid #d1d5db' }}
           onError={() => setImgOk(false)}
         />
       ) : (
         <div
-          className="rounded flex items-center justify-center text-xs font-bold flex-shrink-0"
-          style={{ width: 48, height: 48, background: 'var(--bg-raised)', color: 'var(--text-muted)' }}
+          className="rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          style={{ width: 48, height: 48, background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid #d1d5db' }}
         >
           {initials}
         </div>
@@ -317,7 +338,7 @@ export default function JazzPickOdds({ data, loading, error }) {
                   )}
                 </div>
                 <span className="text-xs font-bold tabular-nums flex-shrink-0"
-                  style={{ width: 40, textAlign: 'right', color: isLottery ? '#00CF94' : pct >= 20 ? 'var(--accent)' : 'var(--text-muted)' }}>
+                  style={{ width: 40, textAlign: 'right', color: isLottery ? '#00CF94' : pick <= 8 ? 'var(--accent)' : 'var(--text-muted)' }}>
                   {pct >= 0.5 ? `${pct.toFixed(1)}%` : '—'}
                 </span>
                 {player?.stats && (
@@ -458,7 +479,7 @@ function BarColumn({ pick, pct, barH, color, isLotteryPick, delay, draftHistory 
         <div
           className="text-center text-[11px] font-semibold mb-1 tabular-nums"
           style={{
-            color: isLotteryPick ? '#00CF94' : pct >= 20 ? 'var(--accent)' : 'var(--text-muted)',
+            color: isLotteryPick ? '#00CF94' : pick <= 8 ? 'var(--accent)' : 'var(--text-muted)',
             lineHeight: 1,
             animation: `grow-up 0.5s ease-out ${delay} both`,
           }}

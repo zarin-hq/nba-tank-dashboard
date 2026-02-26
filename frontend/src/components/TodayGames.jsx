@@ -115,7 +115,6 @@ function InjuryTooltip({ injuries }) {
           color: 'var(--text-muted)',
         }}
       >
-        🩹
         {outCount > 0 && <span>{outCount} out</span>}
         {outCount > 0 && gtdCount > 0 && <span>/</span>}
         {gtdCount > 0 && <span>{gtdCount} gtd</span>}
@@ -170,7 +169,7 @@ function GameCard({ game, slotMap }) {
   const borderColor = isJazz ? 'var(--accent)' : isTankBowl ? '#d97706' : 'var(--border)'
 
   return (
-    <div className="w-full sm:flex-shrink-0 sm:w-52 overflow-hidden flex flex-col"
+    <div className="w-full sm:flex-shrink-0 sm:w-[256px] overflow-hidden flex flex-col"
       style={{ background: 'var(--bg-card)', border: `1px solid ${borderColor}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 16 }}>
       {/* Status row */}
       <div className="flex items-center justify-between px-2.5 pt-2 pb-1.5 sm:px-3 sm:pt-2.5 sm:pb-2"
@@ -227,7 +226,7 @@ function TeamRow({ teamId, name, record, score, lotterySlot, inBottom10, isWinni
       <img
         src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
         alt=""
-        className="w-10 h-10 sm:w-14 sm:h-14 object-contain flex-shrink-0"
+        className="w-9 h-9 sm:w-[50px] sm:h-[50px] object-contain flex-shrink-0"
         onError={e => { e.target.style.display = 'none' }}
       />
 
@@ -249,7 +248,7 @@ function TeamRow({ teamId, name, record, score, lotterySlot, inBottom10, isWinni
           <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{record}</span>
         </div>
         {injuries?.length > 0 && (
-          <div className="mt-1">
+          <div className="mt-1.5">
             <InjuryTooltip injuries={injuries} />
           </div>
         )}

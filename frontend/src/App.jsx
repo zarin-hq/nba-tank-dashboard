@@ -82,12 +82,12 @@ export default function App() {
       <header style={{ background: 'var(--sch-black)', borderBottom: '3px solid var(--sch-teal-bright)', height: 70, overflow: 'visible' }}
         className="px-6">
         <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between">
-          <div className="flex items-center gap-8 h-full">
+          <div className="flex items-center gap-5 h-full">
             <img
               src="/sch-logo.svg"
               alt="Salt City Hoops"
               style={{
-                width: 81, height: 71, flexShrink: 0, alignSelf: 'flex-start', marginTop: 15, position: 'relative', zIndex: 1,
+                width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 15, position: 'relative', zIndex: 1,
                 animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
                 cursor: 'pointer',
               }}
@@ -127,7 +127,7 @@ export default function App() {
               <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Bottom 10 teams only</span>
             </div>
             <div className="flex items-center" style={{ gap: 8 }}>
-              <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>
                 {formatDateLabel(gamesDate)}
               </span>
               <button
