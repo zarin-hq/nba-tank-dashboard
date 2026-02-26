@@ -119,7 +119,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto px-4 py-8 space-y-10">
+      <main className="max-w-[1600px] mx-auto px-4 py-8 space-y-[30px]">
         <section>
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-baseline gap-3">

@@ -191,7 +191,7 @@ export default function TankTable({ data, loading, error }) {
                         style={{ color: isJazz ? 'var(--accent)' : 'var(--text)' }}>
                         {NBA_ABBR[team.team_id] ?? team.team_name}
                       </span>
-                      {PICK_OWED_TO[team.team_id] && (
+                      {PICK_OWED_TO[team.team_id] && !showPicks && (
                         <span
                           className="hidden sm:inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
                           style={{ background: 'rgba(0,0,0,0.06)', color: 'var(--text-muted)' }}
