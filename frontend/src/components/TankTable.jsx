@@ -145,7 +145,7 @@ export default function TankTable({ data, loading, error }) {
               </Th>
               {showPicks && <Th divider compact>P1</Th>}
               {showPicks && PICKS.slice(1).map(p => <Th key={p} compact>P{p}</Th>)}
-              <Th className="min-w-[120px]" tooltip="Remaining Games vs. Bottom-6 Teams">VS B6</Th>
+              <Th className="min-w-[120px]" tooltip="Remaining Games vs. Bottom-6 Teams">Vs. Bottom 6</Th>
             </tr>
           </thead>
           <tbody>
@@ -266,7 +266,7 @@ export default function TankTable({ data, loading, error }) {
                       : (team.vs_bottom6).map((g, i) => (
                           <span key={i}>
                             {i > 0 && <span style={{ color: 'var(--border-med)' }}>, </span>}
-                            <span className="text-[10px]" style={{ color: 'var(--text)' }}>
+                            <span className="text-sm" style={{ color: 'var(--text)' }}>
                               {g.home ? g.opp_abbr : g.opp_abbr.toLowerCase()}
                             </span>
                           </span>

@@ -97,7 +97,7 @@ export default function App() {
             <div>
               <h1 className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
                 style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>
-                JAZZ TANK WATCH
+                Jazz Tank Watch
               </h1>
             </div>
           </div>
@@ -119,14 +119,14 @@ export default function App() {
 
       <main className="max-w-[1600px] mx-auto px-4 py-8 space-y-10">
         <section>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between">
             <div className="flex items-baseline gap-3">
-              <h2 className="font-display text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+              <h2 className="font-display text-sm uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
                 Games
               </h2>
               <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Bottom 10 teams only</span>
             </div>
-            <div className="flex items-center" style={{ gap: 8 }}>
+            <div className="flex items-center" style={{ gap: 6 }}>
               <span className="text-xs" style={{ color: 'var(--text-faint)' }}>
                 {formatDateLabel(gamesDate)}
               </span>
@@ -156,8 +156,8 @@ export default function App() {
         </section>
 
         <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-display text-sm uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
               Lottery Standings
             </h2>
             <LotterySimulator />
@@ -185,8 +185,8 @@ export default function App() {
 
 function SectionHeader({ title, subtitle }) {
   return (
-    <div className="mb-4 flex items-baseline gap-3">
-      <h2 className="font-display text-sm uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+    <div className="mb-2 flex items-baseline gap-3">
+      <h2 className="font-display text-sm uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
         {title}
       </h2>
       {subtitle && (
