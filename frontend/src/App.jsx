@@ -83,17 +83,19 @@ export default function App() {
         className="px-6">
         <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between">
           <div className="flex items-center gap-5 h-full">
-            <img
-              src="/sch-logo.svg"
-              alt="Salt City Hoops"
-              style={{
-                width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 15, position: 'relative', zIndex: 1,
-                animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
-                cursor: 'pointer',
-              }}
-              onMouseEnter={() => setLogoPopped(true)}
-              onAnimationEnd={() => setLogoPopped(false)}
-            />
+            <a href="https://www.saltcityhoops.com" target="_blank" rel="noopener noreferrer">
+              <img
+                src="/sch-logo.svg"
+                alt="Salt City Hoops"
+                style={{
+                  width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 15, position: 'relative', zIndex: 1,
+                  animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={() => setLogoPopped(true)}
+                onAnimationEnd={() => setLogoPopped(false)}
+              />
+            </a>
             <div>
               <h1 className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
                 style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>

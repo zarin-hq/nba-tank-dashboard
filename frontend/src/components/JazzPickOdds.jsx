@@ -68,7 +68,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
     }
     function scheduleHide() {
       if (clickable) {
-        hideTimer.current = setTimeout(() => setVisible(false), 80)
+        hideTimer.current = setTimeout(() => setVisible(false), 400)
       } else {
         setVisible(false)
       }
@@ -89,18 +89,22 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
 
   // For clickable tooltips, keep open while hovering over tooltip itself
   useEffect(() => {
-    if (!clickable || !visible) return
+    if (!clickable || !mounted) return
     const el = tooltipRef.current
     if (!el) return
-    function cancelHide() { clearTimeout(hideTimer.current) }
-    function scheduleHide() { hideTimer.current = setTimeout(() => setVisible(false), 80) }
+    function cancelHide() {
+      clearTimeout(hideTimer.current)
+      clearTimeout(unmountTimer.current)
+      setVisible(true)
+    }
+    function scheduleHide() { hideTimer.current = setTimeout(() => setVisible(false), 150) }
     el.addEventListener('mouseenter', cancelHide)
     el.addEventListener('mouseleave', scheduleHide)
     return () => {
       el.removeEventListener('mouseenter', cancelHide)
       el.removeEventListener('mouseleave', scheduleHide)
     }
-  }, [clickable, visible])
+  }, [clickable, mounted])
 
   // Dismiss on outside touch when visible
   useEffect(() => {
@@ -116,7 +120,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
 
   if (!mounted) return null
 
-  const baseTransform = pos.above ? 'translateY(-100%) translateY(8px)' : ''
+  const baseTransform = pos.above ? 'translateY(-100%) translateY(18px)' : ''
   const slideOffset = pos.above ? 'translateY(6px)' : 'translateY(-6px)'
 
   return createPortal(
