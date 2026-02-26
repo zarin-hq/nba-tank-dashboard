@@ -88,7 +88,7 @@ export default function App() {
                 src="/sch-logo.svg"
                 alt="Salt City Hoops"
                 style={{
-                  width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 15, position: 'relative', zIndex: 1,
+                  width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 19, position: 'relative', zIndex: 1,
                   animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
                   cursor: 'pointer',
                 }}
