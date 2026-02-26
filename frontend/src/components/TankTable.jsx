@@ -145,7 +145,7 @@ export default function TankTable({ data, loading, error }) {
               </Th>
               {showPicks && <Th divider compact>P1</Th>}
               {showPicks && PICKS.slice(1).map(p => <Th key={p} compact>P{p}</Th>)}
-              <Th className="min-w-[120px]" tooltip="Remaining Games vs. Bottom-6 Teams">Vs. Bottom 6</Th>
+              <Th className="min-w-[120px]" tooltip="Remaining games vs. bottom-6 teams. Uppercase = home.">Vs. Bottom-6</Th>
             </tr>
           </thead>
           <tbody>

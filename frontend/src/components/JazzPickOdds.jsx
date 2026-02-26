@@ -116,7 +116,7 @@ function HoverTooltip({ triggerRef, content, align = 'center', placement = 'belo
 
   if (!mounted) return null
 
-  const baseTransform = pos.above ? 'translateY(-100%) translateY(-2px)' : ''
+  const baseTransform = pos.above ? 'translateY(-100%) translateY(8px)' : ''
   const slideOffset = pos.above ? 'translateY(6px)' : 'translateY(-6px)'
 
   return createPortal(
