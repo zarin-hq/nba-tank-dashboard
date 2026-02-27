@@ -75,9 +75,6 @@ export default function App() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
 
-      {/* Top accent bar */}
-      <div className="h-1 w-full" style={{ background: 'var(--accent)' }} />
-
       {/* Header */}
       <header style={{ background: 'var(--sch-black)', borderBottom: '3px solid var(--sch-teal-bright)', height: 70, overflow: 'visible' }}
         className="px-6">
