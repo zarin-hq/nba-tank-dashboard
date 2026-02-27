@@ -83,3 +83,57 @@ body {
   from { opacity: 0; transform: scale(0.88) translateY(6px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
+
+/* ── Button hover utilities ── */
+.btn-teal {
+  transition: filter 0.15s, box-shadow 0.15s;
+}
+.btn-teal:hover {
+  filter: brightness(0.88);
+  box-shadow: 0 2px 8px rgba(0, 255, 182, 0.25);
+}
+
+.btn-dark {
+  transition: background-color 0.15s;
+}
+.btn-dark:hover {
+  background-color: #1a1a1a !important;
+}
+
+.btn-secondary {
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.btn-secondary:hover {
+  border-color: var(--border-med) !important;
+  background-color: #eaeaea !important;
+}
+
+.btn-danger {
+  transition: filter 0.15s;
+}
+.btn-danger:hover {
+  filter: brightness(0.85);
+}
+
+.btn-ghost {
+  transition: opacity 0.15s;
+}
+.btn-ghost:hover {
+  opacity: 0.7;
+}
+
+.btn-x {
+  transition: transform 0.12s, opacity 0.12s;
+  opacity: 0.6;
+}
+.btn-x:hover {
+  transform: scale(1.25);
+  opacity: 1;
+}
+
+.btn-link {
+  transition: opacity 0.15s;
+}
+.btn-link:hover {
+  opacity: 0.7;
+}

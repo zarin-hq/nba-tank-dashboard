@@ -76,14 +76,14 @@ export default function FreeAgency() {
                 <span className="text-xs text-white">Reset all?</span>
                 <button
                   onClick={() => { dispatch({ type: 'RESET' }); setShowResetConfirm(false) }}
-                  className="text-xs px-2 py-1 rounded"
+                  className="text-xs px-2 py-1 rounded btn-danger"
                   style={{ background: '#dc2626', color: 'white', border: 'none', cursor: 'pointer' }}
                 >
                   Yes
                 </button>
                 <button
                   onClick={() => setShowResetConfirm(false)}
-                  className="text-xs px-2 py-1 rounded"
+                  className="text-xs px-2 py-1 rounded btn-ghost"
                   style={{ background: 'var(--sch-med-gray)', color: 'white', border: 'none', cursor: 'pointer' }}
                 >
                   No
@@ -93,7 +93,7 @@ export default function FreeAgency() {
               <button
                 onClick={() => setShowResetConfirm(true)}
                 className="text-xs px-3 py-1.5 rounded"
-                style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}
+                style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = 'white' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
               >

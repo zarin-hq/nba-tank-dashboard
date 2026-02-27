@@ -157,7 +157,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
                 </span>
                 <button
                   onClick={() => dispatch({ type: 'REMOVE_FA', index: i })}
-                  className="text-xs ml-1 leading-none"
+                  className="text-xs ml-1 leading-none btn-x"
                   style={{ color: 'var(--sch-black)', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700, padding: 0 }}
                 >
                   ×
@@ -184,7 +184,9 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
               <button
                 onClick={() => { setSearch(''); setShowAll(false) }}
                 className="absolute right-1.5 top-1/2 flex items-center justify-center"
-                style={{ transform: 'translateY(-50%)', width: 18, height: 18, borderRadius: '50%', background: 'var(--text-muted)', color: 'white', border: 'none', cursor: 'pointer', fontSize: 11, lineHeight: 1, padding: 0 }}
+                style={{ transform: 'translateY(-50%)', width: 18, height: 18, borderRadius: '50%', background: 'var(--text-muted)', color: 'white', border: 'none', cursor: 'pointer', fontSize: 11, lineHeight: 1, padding: 0, transition: 'opacity 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.7' }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
               >
                 ×
               </button>
@@ -193,7 +195,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
           <div className="flex gap-1">
             {POSITIONS.map(p => (
               <button key={p} onClick={() => { setPosFilter(p); setShowAll(false) }}
-                className="text-[10px] font-bold uppercase px-2 py-1 rounded"
+                className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${posFilter === p ? '' : 'btn-secondary'}`}
                 style={{
                   background: posFilter === p ? 'var(--sch-black)' : 'var(--bg-raised)',
                   color: posFilter === p ? 'white' : 'var(--text-muted)',
@@ -208,7 +210,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
           <div className="flex gap-1">
             {TYPES.map(t => (
               <button key={t} onClick={() => { setTypeFilter(t); setShowAll(false) }}
-                className="text-[10px] font-bold uppercase px-2 py-1 rounded"
+                className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${typeFilter === t ? '' : 'btn-secondary'}`}
                 style={{
                   background: typeFilter === t ? 'var(--sch-black)' : 'var(--bg-raised)',
                   color: typeFilter === t ? 'white' : 'var(--text-muted)',
@@ -263,7 +265,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
           <div className="px-4 mt-2">
             <button
               onClick={() => setShowAll(true)}
-              className="w-full text-xs font-semibold py-2 rounded"
+              className="w-full text-xs font-semibold py-2 rounded btn-secondary"
               style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}
             >
               Show all {filtered.length} players
@@ -294,19 +296,19 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
                   className="px-3 py-1.5 rounded text-sm w-20" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} />
               </div>
               <button onClick={addCustomPlayer}
-                className="text-xs font-bold px-3 py-1.5 rounded"
+                className="text-xs font-bold px-3 py-1.5 rounded btn-teal"
                 style={{ background: 'var(--sch-teal)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}>
                 Add
               </button>
               <button onClick={() => setShowCustomForm(false)}
-                className="text-xs px-3 py-1.5 rounded"
+                className="text-xs px-3 py-1.5 rounded btn-secondary"
                 style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}>
                 Cancel
               </button>
             </div>
           ) : (
             <button onClick={() => setShowCustomForm(true)}
-              className="text-xs font-semibold"
+              className="text-xs font-semibold btn-link"
               style={{ color: 'var(--accent-2)', background: 'none', border: 'none', cursor: 'pointer' }}>
               + Add Custom Player
             </button>
@@ -380,14 +382,14 @@ function AgentRow({ agent, onSign }) {
               <span className="text-[10px]" style={{ color: 'var(--text-faint)' }}>M</span>
               <button
                 onClick={handleMleSign}
-                className="text-[10px] font-bold px-3 py-1 rounded cursor-pointer"
+                className="text-[10px] font-bold px-3 py-1 rounded cursor-pointer btn-dark"
                 style={{ background: 'var(--sch-black)', color: 'white', border: 'none' }}
               >
                 Sign
               </button>
               <button
                 onClick={() => setShowMle(false)}
-                className="text-[10px] font-bold px-1 py-1 cursor-pointer"
+                className="text-[10px] font-bold px-1 py-1 cursor-pointer btn-x"
                 style={{ color: 'var(--text-faint)', background: 'none', border: 'none' }}
               >
                 ×
@@ -397,14 +399,14 @@ function AgentRow({ agent, onSign }) {
             <>
               <button
                 onClick={() => onSign(agent, 'vet_min')}
-                className="text-[10px] font-bold uppercase px-2 rounded cursor-pointer inline-flex items-center justify-center"
+                className="text-[10px] font-bold uppercase px-2 rounded cursor-pointer inline-flex items-center justify-center btn-secondary"
                 style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', height: 24, lineHeight: 1 }}
               >
                 + Min
               </button>
               <button
                 onClick={handleMleClick}
-                className="text-[10px] font-bold uppercase px-2 rounded cursor-pointer inline-flex items-center justify-center"
+                className="text-[10px] font-bold uppercase px-2 rounded cursor-pointer inline-flex items-center justify-center btn-secondary"
                 style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', height: 24, lineHeight: 1 }}
               >
                 + MLE

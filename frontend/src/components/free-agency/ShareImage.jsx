@@ -482,6 +482,7 @@ function ShareModal({ canvas, onClose }) {
         }}>
           <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Share Your Build</span>
           <button
+            className="btn-x"
             onClick={onClose}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 20, lineHeight: 1, padding: '0 4px' }}
           >
@@ -499,6 +500,7 @@ function ShareModal({ canvas, onClose }) {
           borderTop: '1px solid #e5e5e5',
         }}>
           <button
+            className="btn-secondary"
             onClick={handleCopy}
             style={{
               padding: '8px 20px', borderRadius: 8,
@@ -509,6 +511,7 @@ function ShareModal({ canvas, onClose }) {
             {copied ? 'Copied!' : 'Copy Image'}
           </button>
           <button
+            className="btn-teal"
             onClick={handleDownload}
             style={{
               padding: '8px 20px', borderRadius: 8,
@@ -605,7 +608,7 @@ export default function ShareSection({ state, computed, roster }) {
               <button
                 onClick={handleGenerate}
                 disabled={loading}
-                className="text-sm font-bold px-6 py-3 rounded-lg"
+                className="text-sm font-bold px-6 py-3 rounded-lg btn-dark"
                 style={{
                   background: 'var(--sch-black)', color: '#fff',
                   border: 'none', cursor: loading ? 'wait' : 'pointer',

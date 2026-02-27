@@ -73,7 +73,7 @@ export default function TradeBuilder({ state, dispatch, roster }) {
                 </div>
                 <button
                   onClick={() => dispatch({ type: 'REMOVE_TRADE', id: t.id })}
-                  className="text-xs font-bold"
+                  className="text-xs font-bold btn-x"
                   style={{ color: '#dc2626', cursor: 'pointer', background: 'none', border: 'none' }}
                 >
                   ×
@@ -100,7 +100,7 @@ export default function TradeBuilder({ state, dispatch, roster }) {
                 <span style={{ color: 'var(--text)' }}>{p.name}</span>
                 <span className="flex items-center gap-2">
                   <span className="tabular-nums" style={{ color: 'var(--text-muted)' }}>{fmt(p.salary)}</span>
-                  <button onClick={() => removeJazzPlayer(i)} style={{ color: '#dc2626', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700 }}>×</button>
+                  <button className="btn-x" onClick={() => removeJazzPlayer(i)} style={{ color: '#dc2626', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700 }}>×</button>
                 </span>
               </div>
             ))}
@@ -120,7 +120,7 @@ export default function TradeBuilder({ state, dispatch, roster }) {
                 ))}
               </select>
               <button onClick={addJazzPlayer}
-                className="text-[10px] font-bold px-4 rounded"
+                className="text-[10px] font-bold px-4 rounded btn-teal"
                 style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer', height: 32 }}>
                 Add
               </button>
@@ -140,7 +140,7 @@ export default function TradeBuilder({ state, dispatch, roster }) {
                 <span style={{ color: 'var(--text)' }}>{p.name}</span>
                 <span className="flex items-center gap-2">
                   <span className="tabular-nums" style={{ color: 'var(--text-muted)' }}>{fmt(p.salary)}</span>
-                  <button onClick={() => removeOtherPlayer(i)} style={{ color: '#dc2626', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700 }}>×</button>
+                  <button className="btn-x" onClick={() => removeOtherPlayer(i)} style={{ color: '#dc2626', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700 }}>×</button>
                 </span>
               </div>
             ))}
@@ -164,7 +164,7 @@ export default function TradeBuilder({ state, dispatch, roster }) {
                 style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', height: 32 }}
               />
               <button onClick={addOtherPlayer}
-                className="text-[10px] font-bold px-4 rounded"
+                className="text-[10px] font-bold px-4 rounded btn-teal"
                 style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer', height: 32 }}>
                 Add
               </button>
@@ -186,7 +186,7 @@ export default function TradeBuilder({ state, dispatch, roster }) {
           <button
             onClick={saveTrade}
             disabled={trade.jazzOut.length === 0 && trade.otherOut.length === 0}
-            className="text-xs font-bold px-4 py-2 rounded"
+            className={`text-xs font-bold px-4 py-2 rounded ${(trade.jazzOut.length > 0 || trade.otherOut.length > 0) ? 'btn-teal' : ''}`}
             style={{
               background: (trade.jazzOut.length > 0 || trade.otherOut.length > 0) ? 'var(--sch-teal-bright)' : 'var(--bg-raised)',
               color: (trade.jazzOut.length > 0 || trade.otherOut.length > 0) ? 'var(--sch-black)' : 'var(--text-faint)',

@@ -22,7 +22,7 @@ function SegmentedControl({ value, options, onChange }) {
           <button
             key={opt.value}
             onClick={() => { if (!active) onChange(opt.value) }}
-            className="text-[10px] font-bold uppercase px-2 py-0.5 cursor-pointer"
+            className={`text-[10px] font-bold uppercase px-2 py-0.5 cursor-pointer ${active ? '' : 'btn-secondary'}`}
             style={{
               background: active ? 'var(--sch-black)' : 'var(--bg-raised)',
               color: active ? 'white' : 'var(--text-muted)',

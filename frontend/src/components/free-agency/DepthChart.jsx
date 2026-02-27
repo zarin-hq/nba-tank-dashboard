@@ -113,6 +113,7 @@ export default function DepthChart({ state, dispatch, roster }) {
                             <span style={{ cursor: 'grab', color: 'var(--text-faint)', fontSize: 10 }}>⠿</span>
                             {playerName}
                             <button
+                              className="btn-x"
                               onClick={(e) => { e.stopPropagation(); removeFromSlot(pos, slotIdx) }}
                               style={{ color: 'var(--text-faint)', cursor: 'pointer', background: 'none', border: 'none', fontSize: 12, fontWeight: 700, marginLeft: 2 }}
                             >
