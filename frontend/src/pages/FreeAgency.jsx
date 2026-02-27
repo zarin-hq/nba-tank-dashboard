@@ -65,7 +65,7 @@ export default function FreeAgency() {
                 className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
                 style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}
               >
-                Jazz Free Agency Sim
+                Jazz Free Agency Simulator
               </h1>
 
             </div>

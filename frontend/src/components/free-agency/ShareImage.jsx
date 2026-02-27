@@ -238,7 +238,7 @@ export async function generateShareImage(state, computed, roster) {
   ctx.font = 'bold 46px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
   ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
-  ctx.fillText('JAZZ FREE AGENCY SIM', 36 + LOGO_SIZE + 56, HEADER_H / 2)
+  ctx.fillText('JAZZ FREE AGENCY SIMULATOR', 36 + LOGO_SIZE + 56, HEADER_H / 2)
 
   ctx.fillStyle = 'rgba(255,255,255,0.45)'
   ctx.font = '20px -apple-system, BlinkMacSystemFont, sans-serif'
