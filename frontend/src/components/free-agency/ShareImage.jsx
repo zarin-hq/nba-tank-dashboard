@@ -21,14 +21,26 @@ function fmt(n) {
 }
 
 async function loadImage(url) {
-  // Try fetch+blob first (works for same-origin and CORS-enabled)
+  const isLocal = url.startsWith('/') || url.startsWith('data:')
+
+  // Try direct fetch first (works for same-origin and CORS-enabled like ESPN)
   try {
     const res = await fetch(url, { mode: 'cors' })
     if (!res.ok) throw new Error()
     const blob = await res.blob()
     return createImageBitmap(blob)
   } catch {
-    // Fallback: use Image element (handles more URL types)
+    // For external URLs without CORS, proxy through wsrv.nl
+    if (!isLocal) {
+      try {
+        const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(url)}`
+        const res = await fetch(proxyUrl, { mode: 'cors' })
+        if (!res.ok) throw new Error()
+        const blob = await res.blob()
+        return createImageBitmap(blob)
+      } catch {}
+    }
+    // Final fallback: Image element
     return new Promise(resolve => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
