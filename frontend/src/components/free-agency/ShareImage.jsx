@@ -200,7 +200,7 @@ export async function generateShareImage(state, computed, roster) {
     const rosterPlayer = roster.find(p => p.name === name)
     const draftProspect = DRAFT_PROSPECTS.find(d => d.name === name)
     const espnId = rosterPlayer?.espnId
-    const photo = rosterPlayer?.photo || draftProspect?.photo
+    const photo = draftProspect?.photo || rosterPlayer?.photo
     const url = espnId ? headshotUrl(espnId) : photo
     if (!url) return Promise.resolve([name, null])
     return loadImage(url).then(img => [name, img])
