@@ -593,7 +593,7 @@ export default function ShareSection({ state, computed, roster }) {
           </div>
 
           {/* Right: heading + button */}
-          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-center items-start">
             <img src="/share-illustration.svg" alt="" style={{ height: 32, width: 'auto', marginBottom: 12 }} />
             <h3
               className="text-3xl font-bold mb-5"
