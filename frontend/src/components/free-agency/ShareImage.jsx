@@ -591,27 +591,26 @@ export default function ShareSection({ state, computed, roster }) {
     <>
       <div
         ref={cardRef}
-        className="rounded-xl"
+        className="rounded-xl p-6 sm:p-12"
         style={{
           background: 'var(--sch-teal-bright)',
           backgroundImage: 'url(/dark-teal-stripes.svg)',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'calc(50% + 160px) center',
           backgroundSize: 'auto 100%',
-          padding: 48,
         }}
       >
-        <div className="flex flex-col sm:flex-row items-center" style={{ gap: 80 }}>
+        <div className="flex flex-col sm:flex-row items-center gap-10 sm:gap-20">
           {/* Left: static preview with tilt effect */}
           <div className="sm:w-[260px] flex-shrink-0">
             <TiltPreview tilt={tilt} hovering={hovering} />
           </div>
 
           {/* Right: heading + button */}
-          <div className="flex-1 flex flex-col justify-center items-start">
+          <div className="flex-1 flex flex-col justify-center items-center sm:items-start">
             <img src="/share-illustration.svg" alt="" style={{ height: 32, width: 'auto', marginBottom: 12 }} />
             <h3
-              className="text-3xl font-bold mb-5"
+              className="text-3xl font-bold mb-5 text-center sm:text-left"
               style={{ color: 'var(--sch-black)', fontFamily: "'Archivo Black', Arial, sans-serif" }}
             >
               Share Your Results

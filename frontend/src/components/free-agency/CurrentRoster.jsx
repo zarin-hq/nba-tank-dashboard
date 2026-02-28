@@ -1,6 +1,8 @@
 import { GUARANTEED, NON_GUARANTEED, RFA_DECISIONS, TEAM_OPTIONS } from '../../data/jazz-contracts'
+import useIsMobile from '../../hooks/useIsMobile'
 
 const fmt = n => `$${(n / 1_000_000).toFixed(1)}M`
+const shortName = name => { const parts = (name || '').split(' '); return parts.length < 2 ? name : `${parts[0][0]}. ${parts.slice(1).join(' ')}` }
 const headshotUrl = id => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=48&h=35`
 
 function PlayerPhoto({ espnId, name, size = 28 }) {
@@ -40,6 +42,7 @@ function SegmentedControl({ value, options, onChange }) {
 }
 
 export default function CurrentRoster({ state, dispatch }) {
+  const isMobile = useIsMobile()
   return (
     <div className="rounded-xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
       {/* Table header */}
@@ -47,7 +50,7 @@ export default function CurrentRoster({ state, dispatch }) {
         <table className="w-full" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--sch-black)' }}>
-              <Th>Player</Th>
+              <Th sticky>Player</Th>
               <Th align="center">Pos</Th>
               <Th align="right">Salary</Th>
               <Th align="center">Status</Th>
@@ -58,7 +61,7 @@ export default function CurrentRoster({ state, dispatch }) {
             {/* Guaranteed contracts */}
             <GroupLabel label="Guaranteed" />
             {GUARANTEED.map(p => (
-              <Row key={p.name} player={p} status="Guaranteed" statusColor="var(--sch-teal)" />
+              <Row key={p.name} player={p} status="Guaranteed" statusColor="var(--sch-teal)" isMobile={isMobile} />
             ))}
 
             {/* Non-guaranteed */}
@@ -66,7 +69,7 @@ export default function CurrentRoster({ state, dispatch }) {
             {NON_GUARANTEED.map(p => {
               const kept = state.nonGuaranteedDecisions[p.name] === 'keep'
               return (
-                <Row key={p.name} player={p} status={kept ? 'Guaranteed' : 'Declined'} statusColor={kept ? 'var(--sch-teal)' : 'var(--text-muted)'}>
+                <Row key={p.name} player={p} status={kept ? 'Guaranteed' : 'Declined'} statusColor={kept ? 'var(--sch-teal)' : 'var(--text-muted)'} isMobile={isMobile}>
                   <SegmentedControl
                     value={state.nonGuaranteedDecisions[p.name]}
                     options={[
@@ -92,13 +95,21 @@ export default function CurrentRoster({ state, dispatch }) {
                   key={p.name}
                   style={{ borderBottom: '1px solid var(--border)' }}
                   className="transition-colors"
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '' }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--sch-smoke)'
+                    const sticky = e.currentTarget.querySelector('[data-sticky]')
+                    if (sticky) sticky.style.background = 'var(--sch-smoke)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = ''
+                    const sticky = e.currentTarget.querySelector('[data-sticky]')
+                    if (sticky) sticky.style.background = 'var(--bg-card)'
+                  }}
                 >
-                  <td className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)' }}>
+                  <td data-sticky className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
                     <div className="flex items-center gap-2">
                       <PlayerPhoto espnId={p.espnId} name={p.name} />
-                      {p.name}
+                      {isMobile ? shortName(p.name) : p.name}
                     </div>
                   </td>
                   <td className="px-3 py-2.5 text-xs text-center" style={{ color: 'var(--text-muted)' }}>
@@ -158,29 +169,37 @@ export default function CurrentRoster({ state, dispatch }) {
   )
 }
 
-function Th({ children, align = 'left' }) {
+function Th({ children, align = 'left', sticky }) {
   return (
     <th
       className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
-      style={{ color: 'rgba(255,255,255,0.7)', textAlign: align }}
+      style={{ color: 'rgba(255,255,255,0.7)', textAlign: align, ...(sticky ? { position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' } : {}) }}
     >
       {children}
     </th>
   )
 }
 
-function Row({ player, status, statusColor, children }) {
+function Row({ player, status, statusColor, children, isMobile }) {
   return (
     <tr
       style={{ borderBottom: '1px solid var(--border)' }}
       className="transition-colors"
-      onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
-      onMouseLeave={e => { e.currentTarget.style.background = '' }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'var(--sch-smoke)'
+        const sticky = e.currentTarget.querySelector('[data-sticky]')
+        if (sticky) sticky.style.background = 'var(--sch-smoke)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = ''
+        const sticky = e.currentTarget.querySelector('[data-sticky]')
+        if (sticky) sticky.style.background = 'var(--bg-card)'
+      }}
     >
-      <td className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)' }}>
+      <td data-sticky className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
         <div className="flex items-center gap-2">
           <PlayerPhoto espnId={player.espnId} name={player.name} />
-          {player.name}
+          {isMobile ? shortName(player.name) : player.name}
         </div>
       </td>
       <td className="px-3 py-2.5 text-xs text-center" style={{ color: 'var(--text-muted)' }}>

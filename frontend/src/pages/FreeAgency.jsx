@@ -76,15 +76,17 @@ export default function FreeAgency() {
                 <span className="text-xs text-white">Reset all?</span>
                 <button
                   onClick={() => { dispatch({ type: 'RESET' }); setShowResetConfirm(false) }}
-                  className="text-xs px-2 py-1 rounded btn-danger"
-                  style={{ background: '#dc2626', color: 'white', border: 'none', cursor: 'pointer' }}
+                  className="text-xs font-bold px-3 py-1.5 rounded btn-teal"
+                  style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
                 >
                   Yes
                 </button>
                 <button
                   onClick={() => setShowResetConfirm(false)}
-                  className="text-xs px-2 py-1 rounded btn-ghost"
-                  style={{ background: 'var(--sch-med-gray)', color: 'white', border: 'none', cursor: 'pointer' }}
+                  className="text-xs font-bold px-3 py-1.5 rounded"
+                  style={{ background: 'none', border: '1px solid rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = 'white' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
                 >
                   No
                 </button>
@@ -200,12 +202,14 @@ function CollapsibleSection({ title, subtitle, children }) {
         >
           ▸
         </span>
-        <h2 className="font-display text-sm uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
-          {title}
-        </h2>
-        {subtitle && (
-          <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{subtitle}</span>
-        )}
+        <div className="min-w-0">
+          <h2 className="font-display text-sm uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
+            {title}
+          </h2>
+          {subtitle && (
+            <span className="text-xs block sm:inline sm:ml-1.5" style={{ color: 'var(--text-faint)' }}>{subtitle}</span>
+          )}
+        </div>
       </button>
       {open && children}
     </section>

@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react'
 import FREE_AGENTS from '../../data/free-agents'
 import { CAP_NUMBERS, EXPIRING, getVetMin } from '../../data/jazz-contracts'
+import useIsMobile from '../../hooks/useIsMobile'
 
 const fmt = n => `$${(n / 1_000_000).toFixed(1)}M`
+const shortName = name => { const parts = (name || '').split(' '); return parts.length < 2 ? name : `${parts[0][0]}. ${parts.slice(1).join(' ')}` }
 const headshotUrl = id => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=48&h=35`
 
 function PlayerPhoto({ espnId, name, size = 28 }) {
@@ -48,6 +50,7 @@ const POSITIONS = ['All', 'PG', 'SG', 'SF', 'PF', 'C']
 const TYPES = ['All', 'UFA', 'RFA', 'PO', 'TO']
 
 export default function FreeAgentMarket({ state, dispatch, computed, waivedPlayers }) {
+  const isMobile = useIsMobile()
   const [search, setSearch] = useState('')
   const [posFilter, setPosFilter] = useState('All')
   const [typeFilter, setTypeFilter] = useState('All')
@@ -229,7 +232,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
           <table className="w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--sch-black)' }}>
-                <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-left" style={{ color: 'rgba(255,255,255,0.7)' }}>Player</th>
+                <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-left" style={{ color: 'rgba(255,255,255,0.7)', position: 'sticky', left: 0, zIndex: 3, background: 'var(--sch-black)' }}>Player</th>
                 <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-center" style={{ color: 'rgba(255,255,255,0.7)' }}>Pos</th>
                 <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-center" style={{ color: sortBy === 'age' ? '#fff' : 'rgba(255,255,255,0.7)', cursor: 'pointer' }} onClick={() => toggleSort('age')}>
                   Age {sortBy === 'age' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
@@ -252,7 +255,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
             </thead>
             <tbody>
               {visibleAgents.map(agent => (
-                <AgentRow key={agent.name} agent={agent} onSign={signPlayer} />
+                <AgentRow key={agent.name} agent={agent} onSign={signPlayer} isMobile={isMobile} />
               ))}
               {filtered.length === 0 && (
                 <tr><td colSpan={7} className="px-3 py-6 text-center text-sm" style={{ color: 'var(--text-faint)' }}>No matching free agents</td></tr>
@@ -319,7 +322,7 @@ export default function FreeAgentMarket({ state, dispatch, computed, waivedPlaye
   )
 }
 
-function AgentRow({ agent, onSign }) {
+function AgentRow({ agent, onSign, isMobile }) {
   const [showMle, setShowMle] = useState(false)
   const [mleSalary, setMleSalary] = useState('')
 
@@ -339,13 +342,21 @@ function AgentRow({ agent, onSign }) {
     <tr
       style={{ borderBottom: '1px solid var(--border)' }}
       className="transition-colors"
-      onMouseEnter={e => { e.currentTarget.style.background = 'var(--sch-smoke)' }}
-      onMouseLeave={e => { e.currentTarget.style.background = '' }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'var(--sch-smoke)'
+        const sticky = e.currentTarget.querySelector('[data-sticky]')
+        if (sticky) sticky.style.background = 'var(--sch-smoke)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = ''
+        const sticky = e.currentTarget.querySelector('[data-sticky]')
+        if (sticky) sticky.style.background = 'var(--bg-card)'
+      }}
     >
-      <td className="px-3 py-2 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)' }}>
+      <td data-sticky className="px-3 py-2 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
         <div className="flex items-center gap-2">
           <PlayerPhoto espnId={agent.espnId} name={agent.name} />
-          {agent.name}
+          {isMobile ? shortName(agent.name) : agent.name}
         </div>
       </td>
       <td className="px-3 py-2 text-xs text-center" style={{ color: 'var(--text-muted)' }}>{agent.position}</td>

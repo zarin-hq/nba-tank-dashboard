@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C']
 const DEPTH_LABELS = ['Starters', '2nd Unit', 'Reserves']
@@ -8,6 +8,10 @@ export default function DepthChart({ state, dispatch, roster }) {
   const dragItem = useRef(null)
   const dragOver = useRef(null)
   const [dragSource, setDragSource] = useState(null)
+
+  // Touch drag state
+  const touchClone = useRef(null)
+  const touchPlayer = useRef(null)
 
   // All assigned player names
   const assigned = new Set()
@@ -67,6 +71,75 @@ export default function DepthChart({ state, dispatch, roster }) {
     dispatch({ type: 'UPDATE_DEPTH_CHART', payload: newChart })
   }
 
+  // ── Touch drag-and-drop ──
+  function handleTouchStart(e, playerName) {
+    const touch = e.touches[0]
+    touchPlayer.current = playerName
+    dragItem.current = playerName
+
+    // Create visual clone
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const clone = el.cloneNode(true)
+    clone.style.position = 'fixed'
+    clone.style.left = `${rect.left}px`
+    clone.style.top = `${rect.top}px`
+    clone.style.width = `${rect.width}px`
+    clone.style.zIndex = '9999'
+    clone.style.opacity = '0.85'
+    clone.style.pointerEvents = 'none'
+    clone.style.boxShadow = '0 8px 24px rgba(0,0,0,0.25)'
+    clone.style.transform = 'scale(1.05)'
+    document.body.appendChild(clone)
+    touchClone.current = clone
+  }
+
+  const handleTouchMove = useCallback((e) => {
+    if (!touchClone.current) return
+    e.preventDefault()
+    const touch = e.touches[0]
+    const clone = touchClone.current
+    clone.style.left = `${touch.clientX - clone.offsetWidth / 2}px`
+    clone.style.top = `${touch.clientY - clone.offsetHeight / 2}px`
+  }, [])
+
+  const handleTouchEnd = useCallback((e) => {
+    if (!touchClone.current || !touchPlayer.current) return
+
+    const touch = e.changedTouches[0]
+    // Clean up clone
+    touchClone.current.remove()
+    touchClone.current = null
+
+    // Find drop target under the finger
+    const target = document.elementFromPoint(touch.clientX, touch.clientY)
+    if (target) {
+      const dropTarget = target.closest('[data-drop-target]')
+      if (dropTarget) {
+        const val = dropTarget.getAttribute('data-drop-target')
+        if (val === 'pool') {
+          handleDropOnPool()
+        } else {
+          const [pos, idx] = val.split('-')
+          handleDropOnSlot(pos, parseInt(idx, 10))
+        }
+      }
+    }
+
+    touchPlayer.current = null
+    dragItem.current = null
+    setDragSource(null)
+  }, [depthChart, dispatch])
+
+  useEffect(() => {
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd)
+    return () => {
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [handleTouchMove, handleTouchEnd])
+
   return (
     <div className="space-y-3">
       {/* Depth chart grid */}
@@ -95,6 +168,7 @@ export default function DepthChart({ state, dispatch, roster }) {
                       <td
                         key={pos}
                         className="px-2 py-2 text-center"
+                        data-drop-target={`${pos}-${slotIdx}`}
                         onDragOver={handleDragOver}
                         onDrop={() => handleDropOnSlot(pos, slotIdx)}
                         style={{ minHeight: 44 }}
@@ -103,6 +177,7 @@ export default function DepthChart({ state, dispatch, roster }) {
                           <div
                             draggable
                             onDragStart={() => handleDragStart(playerName, `${pos}-${slotIdx}`)}
+                            onTouchStart={(e) => handleTouchStart(e, playerName)}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-grab"
                             style={{
                               background: 'var(--bg-raised)',
@@ -141,6 +216,7 @@ export default function DepthChart({ state, dispatch, roster }) {
       {/* Unassigned player pool */}
       <div
         className="rounded-xl px-4 py-4"
+        data-drop-target="pool"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
         onDragOver={handleDragOver}
         onDrop={handleDropOnPool}
@@ -154,6 +230,7 @@ export default function DepthChart({ state, dispatch, roster }) {
               key={p.name}
               draggable
               onDragStart={() => handleDragStart(p.name, 'pool')}
+              onTouchStart={(e) => handleTouchStart(e, p.name)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-grab"
               style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text)' }}
             >

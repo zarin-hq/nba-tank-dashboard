@@ -50,16 +50,16 @@ export default function CapOverview({ computed }) {
           {/* Tax line */}
           <div className="absolute top-0 h-full" style={{ left: `${taxLinePct}%`, width: 2, background: 'var(--sch-black)', opacity: 0.6 }} />
           {/* 1st Apron line */}
-          <div className="absolute top-0 h-full" style={{ left: `${apron1Pct}%`, width: 2, background: 'var(--sch-black)', opacity: 0.6 }} />
+          <div className="absolute top-0 h-full hidden sm:block" style={{ left: `${apron1Pct}%`, width: 2, background: 'var(--sch-black)', opacity: 0.6 }} />
           {/* 2nd Apron line */}
-          <div className="absolute top-0 h-full" style={{ left: `${apron2Pct}%`, width: 2, background: 'var(--sch-black)', opacity: 0.6 }} />
+          <div className="absolute top-0 h-full hidden sm:block" style={{ left: `${apron2Pct}%`, width: 2, background: 'var(--sch-black)', opacity: 0.6 }} />
         </div>
         {/* Labels below */}
         <div className="relative mt-1" style={{ height: 24 }}>
           <CapLabel left={capLinePct} label="Cap" value={fmt(salaryCap)} tip="The salary cap is the soft limit on team spending. Teams can exceed it using exceptions like Bird rights, the MLE, and vet minimums." />
           <CapLabel left={taxLinePct} label="Tax" value={fmt(luxuryTax)} tip="The luxury tax threshold. Teams exceeding this line pay a progressive tax penalty on every dollar over." />
-          <CapLabel left={apron1Pct} label="1st" value={fmt(firstApron)} tip="The first apron restricts teams from using certain exceptions and limits trade flexibility." />
-          <CapLabel left={apron2Pct} label="2nd" value={fmt(secondApron)} tip="The second (hard) apron imposes the strictest restrictions — teams above this cannot aggregate salaries in trades, use the bi-annual exception, or send cash in trades." />
+          <span className="hidden sm:inline"><CapLabel left={apron1Pct} label="1st" value={fmt(firstApron)} tip="The first apron restricts teams from using certain exceptions and limits trade flexibility." /></span>
+          <span className="hidden sm:inline"><CapLabel left={apron2Pct} label="2nd" value={fmt(secondApron)} tip="The second (hard) apron imposes the strictest restrictions — teams above this cannot aggregate salaries in trades, use the bi-annual exception, or send cash in trades." /></span>
         </div>
       </div>
 
