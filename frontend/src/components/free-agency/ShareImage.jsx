@@ -591,7 +591,7 @@ export default function ShareSection({ state, computed, roster }) {
     <>
       <div
         ref={cardRef}
-        className="rounded-xl p-6 sm:p-12"
+        className="rounded-xl p-6 pb-12 sm:p-12"
         style={{
           background: 'var(--sch-teal-bright)',
           backgroundImage: 'url(/dark-teal-stripes.svg)',
@@ -610,7 +610,7 @@ export default function ShareSection({ state, computed, roster }) {
           <div className="flex-1 flex flex-col justify-center items-center sm:items-start">
             <img src="/share-illustration.svg" alt="" style={{ height: 32, width: 'auto', marginBottom: 12 }} />
             <h3
-              className="text-3xl font-bold mb-5 text-center sm:text-left"
+              className="text-2xl font-bold mb-5 text-center sm:text-left"
               style={{ color: 'var(--sch-black)', fontFamily: "'Archivo Black', Arial, sans-serif" }}
             >
               Share Your Results

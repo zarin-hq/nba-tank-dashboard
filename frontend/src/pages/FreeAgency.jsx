@@ -36,6 +36,7 @@ export default function FreeAgency() {
   const { state, dispatch, computed, roster, waivedPlayers } = useSimState()
   const [logoPopped, setLogoPopped] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [teamOpen, setTeamOpen] = useState(false)
   useEffect(() => { document.title = 'Jazz Free Agency Simulator | Salt City Hoops' }, [])
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -62,7 +63,7 @@ export default function FreeAgency() {
             </a>
             <div>
               <h1
-                className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
+                className="text-sm sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
                 style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}
               >
                 Jazz Free Agency Simulator
@@ -70,7 +71,7 @@ export default function FreeAgency() {
 
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3">
             {showResetConfirm ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-white">Reset all?</span>
@@ -105,6 +106,45 @@ export default function FreeAgency() {
           </div>
         </div>
       </header>
+
+      {/* Mobile-only My Team sticky bar */}
+      <div className="sm:hidden sticky" style={{ top: 73, zIndex: 20 }}>
+        <button
+          onClick={() => setTeamOpen(o => !o)}
+          className="w-full flex items-center justify-between px-4 py-2.5"
+          style={{ background: 'var(--sch-black)', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+        >
+          <span className="text-xs font-bold text-white">
+            My Team &middot; {roster.length} Players &middot; {fmt(computed.totalPayroll)}
+          </span>
+          <svg
+            style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.6)', transition: 'transform 0.2s', transform: teamOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            viewBox="0 0 20 20" fill="currentColor"
+          >
+            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+          </svg>
+        </button>
+        {teamOpen && (
+          <div className="overflow-y-auto" style={{ maxHeight: '50vh', background: 'var(--bg-card)', borderBottom: '1px solid var(--border)' }}>
+            {[...roster].sort((a, b) => (b.salary || 0) - (a.salary || 0)).map(p => (
+              <div
+                key={p.name}
+                className="px-4 py-2 flex items-center justify-between"
+                style={{ borderBottom: '1px solid var(--border)' }}
+              >
+                <div className="min-w-0 flex items-center gap-2">
+                  <PlayerPhoto espnId={p.espnId} photo={p.photo || DRAFT_PROSPECTS.find(d => d.name === p.name)?.photo} name={p.name} />
+                  <span className="text-xs font-semibold truncate" style={{ color: 'var(--text)' }}>{p.name}</span>
+                  <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-faint)' }}>{p.position}</span>
+                </div>
+                <span className="text-xs font-bold tabular-nums flex-shrink-0 ml-2" style={{ color: 'var(--text-muted)' }}>
+                  {p.salary ? `$${(p.salary / 1_000_000).toFixed(1)}M` : '—'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="max-w-[1600px] mx-auto px-4 py-8 flex gap-6">
         {/* Left column — main content */}

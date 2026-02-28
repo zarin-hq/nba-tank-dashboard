@@ -106,7 +106,7 @@ export default function CurrentRoster({ state, dispatch }) {
                     if (sticky) sticky.style.background = 'var(--bg-card)'
                   }}
                 >
-                  <td data-sticky className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
+                  <td data-sticky className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     <div className="flex items-center gap-2">
                       <PlayerPhoto espnId={p.espnId} name={p.name} />
                       {isMobile ? shortName(p.name) : p.name}
@@ -196,7 +196,7 @@ function Row({ player, status, statusColor, children, isMobile }) {
         if (sticky) sticky.style.background = 'var(--bg-card)'
       }}
     >
-      <td data-sticky className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
+      <td data-sticky className="px-3 py-2.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
         <div className="flex items-center gap-2">
           <PlayerPhoto espnId={player.espnId} name={player.name} />
           {isMobile ? shortName(player.name) : player.name}

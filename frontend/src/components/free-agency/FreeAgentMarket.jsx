@@ -353,7 +353,7 @@ function AgentRow({ agent, onSign, isMobile }) {
         if (sticky) sticky.style.background = 'var(--bg-card)'
       }}
     >
-      <td data-sticky className="px-3 py-2 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)' }}>
+      <td data-sticky className="px-3 py-2 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text)', position: 'sticky', left: 0, zIndex: 2, background: 'var(--bg-card)', boxShadow: '2px 0 4px rgba(0,0,0,0.06)', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
         <div className="flex items-center gap-2">
           <PlayerPhoto espnId={agent.espnId} name={agent.name} />
           {isMobile ? shortName(agent.name) : agent.name}
