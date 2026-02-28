@@ -42,8 +42,8 @@ export default function FreeAgency() {
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Header */}
       <header
-        style={{ background: 'var(--sch-black)', borderBottom: '3px solid var(--sch-teal-bright)', height: 70, overflow: 'visible' }}
-        className="px-6"
+        style={{ background: 'var(--sch-black)', height: 70, overflow: 'visible' }}
+        className="px-6 sm:border-b-[3px] sm:border-[var(--sch-teal-bright)]"
       >
         <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between">
           <div className="flex items-center gap-5 h-full">
@@ -108,7 +108,7 @@ export default function FreeAgency() {
       </header>
 
       {/* Mobile-only My Team sticky bar */}
-      <div className="sm:hidden sticky" style={{ top: 73, zIndex: 20 }}>
+      <div className="sm:hidden sticky" style={{ top: 0, zIndex: 20 }}>
         <button
           onClick={() => setTeamOpen(o => !o)}
           className="w-full flex items-center justify-between px-4 py-2.5"
