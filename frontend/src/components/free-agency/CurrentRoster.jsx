@@ -219,10 +219,12 @@ function Row({ player, status, statusColor, children, isMobile }) {
 }
 
 function GroupLabel({ label }) {
+  const isMobile = useIsMobile()
+  const display = isMobile && label === 'Restricted Free Agents' ? 'Restricted' : label
   return (
     <tr>
-      <td colSpan={5} className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ background: 'var(--bg-raised)', color: 'var(--accent)' }}>
-        {label}
+      <td colSpan={5} className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap" style={{ background: 'var(--bg-raised)', color: 'var(--accent)', position: 'sticky', left: 0, zIndex: 2 }}>
+        {display}
       </td>
     </tr>
   )

@@ -28,7 +28,7 @@ export default function CapOverview({ computed }) {
   const cards = [
     { label: 'Total Payroll', value: fmt(totalPayroll), color: 'var(--sch-black)' },
     { label: 'Cap Space', value: fmt(capSpace), sub: capSpace < 0 ? 'Over cap' : 'Under cap', color: 'var(--sch-black)', tip: 'How much room the team has before reaching the salary cap. Teams over the cap can still sign players using exceptions like the MLE and vet minimum.' },
-    { label: 'Tax Space', value: fmt(taxSpace), sub: taxSpace < 0 ? 'Over tax' : 'Under tax', color: taxSpace >= 0 ? 'var(--sch-black)' : '#dc2626', tip: 'How much room the team has before hitting the luxury tax line. Teams over the tax pay a progressive dollar-for-dollar penalty that increases with repeat offenses.' },
+    { label: 'Tax Space', value: fmt(taxSpace), sub: taxSpace < 0 ? 'Over tax' : 'Under tax', color: taxSpace >= 0 ? 'var(--sch-black)' : '#dc2626', tip: 'How much room the team has before hitting the luxury tax line. Teams over the tax pay a progressive dollar-for-dollar penalty that increases with repeat offenses.', tipLeft: true },
     { label: 'Roster Spots', value: `${rosterCount}/15`, sub: rosterCount > 15 ? 'Over limit' : `${15 - rosterCount} open`, color: rosterCount > 15 ? '#dc2626' : 'var(--text)' },
   ]
 
@@ -71,7 +71,7 @@ export default function CapOverview({ computed }) {
             <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
               {c.label}
             </div>
-            {c.tip && <CardTip text={c.tip} />}
+            {c.tip && <CardTip text={c.tip} alignLeft={c.tipLeft} />}
             <div className="text-2xl font-bold tabular-nums" style={{ color: c.color }}>
               {c.value}
             </div>
@@ -113,7 +113,7 @@ function CapLabel({ left, label, value, tip }) {
   )
 }
 
-function CardTip({ text }) {
+function CardTip({ text, alignLeft }) {
   const [show, setShow] = useState(false)
   return (
     <span
@@ -129,7 +129,8 @@ function CardTip({ text }) {
         <span
           className="absolute z-50 rounded-lg text-[11px] font-normal normal-case tracking-normal text-left leading-snug"
           style={{
-            bottom: '100%', right: 0, marginBottom: 6,
+            bottom: '100%', marginBottom: 6,
+            ...(alignLeft ? { left: 0 } : { right: 0 }),
             width: 220, padding: '8px 10px',
             background: 'var(--sch-black)', color: 'white',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
