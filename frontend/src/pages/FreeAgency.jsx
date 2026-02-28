@@ -43,7 +43,7 @@ export default function FreeAgency() {
       {/* Header */}
       <header
         style={{ background: 'var(--sch-black)', height: 70, overflow: 'visible' }}
-        className="px-6 sm:border-b-[3px] sm:border-[var(--sch-teal-bright)]"
+        className="px-6 border-b-[3px] border-[var(--sch-teal-bright)]"
       >
         <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between">
           <div className="flex items-center gap-5 h-full">
@@ -53,7 +53,7 @@ export default function FreeAgency() {
                 alt="Salt City Hoops"
                 style={{
                   width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 19,
-                  position: 'relative', zIndex: 1,
+                  position: 'relative', zIndex: 21,
                   animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
                   cursor: 'pointer',
                 }}
