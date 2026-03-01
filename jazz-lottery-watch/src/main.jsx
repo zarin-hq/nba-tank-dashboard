@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App'
 import StyleGuide from './StyleGuide'
 import FreeAgency from './pages/FreeAgency'
@@ -13,11 +13,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<App />} />
+          <Route path="/jazz-lottery-watch" element={<App />} />
           <Route path="/free-agency" element={<FreeAgency />} />
           <Route path="/draft-history" element={<DraftHistory />} />
         </Route>
         <Route path="/style-guide" element={<StyleGuide />} />
+        <Route path="/" element={<Navigate to="/jazz-lottery-watch" replace />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
