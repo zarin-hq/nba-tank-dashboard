@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import useSimState from '../hooks/useSimState'
+import { LayoutConfig } from '../components/Layout'
 import CapOverview from '../components/free-agency/CapOverview'
 import CurrentRoster from '../components/free-agency/CurrentRoster'
 import DraftPick from '../components/free-agency/DraftPick'
@@ -34,78 +35,49 @@ const fmt = n => {
 
 export default function FreeAgency() {
   const { state, dispatch, computed, roster, waivedPlayers } = useSimState()
-  const [logoPopped, setLogoPopped] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [teamOpen, setTeamOpen] = useState(false)
   useEffect(() => { document.title = 'Jazz Free Agency Simulator | Salt City Hoops' }, [])
-  return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      {/* Header */}
-      <header
-        style={{ background: 'var(--sch-black)', height: 70, overflow: 'visible' }}
-        className="px-6 border-b-[3px] border-[var(--sch-teal-bright)]"
-      >
-        <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between">
-          <div className="flex items-center gap-5 h-full">
-            <a href="https://www.saltcityhoops.com" target="_blank" rel="noopener noreferrer">
-              <img
-                src="/sch-logo.svg"
-                alt="Salt City Hoops"
-                style={{
-                  width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 19,
-                  position: 'relative', zIndex: 21,
-                  animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={() => setLogoPopped(true)}
-                onAnimationEnd={() => setLogoPopped(false)}
-              />
-            </a>
-            <div>
-              <h1
-                className="text-sm sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
-                style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}
-              >
-                Jazz Free Agency Simulator
-              </h1>
 
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-3">
-            {showResetConfirm ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-white">Reset all?</span>
-                <button
-                  onClick={() => { dispatch({ type: 'RESET' }); setShowResetConfirm(false) }}
-                  className="text-xs font-bold px-3 py-1.5 rounded btn-teal"
-                  style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => setShowResetConfirm(false)}
-                  className="text-xs font-bold px-3 py-1.5 rounded"
-                  style={{ background: 'none', border: '1px solid rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = 'white' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
-                >
-                  No
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowResetConfirm(true)}
-                className="text-xs px-3 py-1.5 rounded"
-                style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = 'white' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
-              >
-                Reset Sim
-              </button>
-            )}
-          </div>
+  const resetButton = (
+    <div className="hidden sm:flex items-center gap-3">
+      {showResetConfirm ? (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-white">Reset all?</span>
+          <button
+            onClick={() => { dispatch({ type: 'RESET' }); setShowResetConfirm(false) }}
+            className="text-xs font-bold px-3 py-1.5 rounded btn-teal"
+            style={{ background: 'var(--sch-teal-bright)', color: 'var(--sch-black)', border: 'none', cursor: 'pointer' }}
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => setShowResetConfirm(false)}
+            className="text-xs font-bold px-3 py-1.5 rounded"
+            style={{ background: 'none', border: '1px solid rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = 'white' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
+          >
+            No
+          </button>
         </div>
-      </header>
+      ) : (
+        <button
+          onClick={() => setShowResetConfirm(true)}
+          className="text-xs px-3 py-1.5 rounded"
+          style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = 'white' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
+        >
+          Reset Sim
+        </button>
+      )}
+    </div>
+  )
+
+  return (
+    <>
+      <LayoutConfig title="Jazz Free Agency Simulator" headerRight={resetButton} />
 
       {/* Mobile-only My Team sticky bar */}
       <div className="sm:hidden sticky" style={{ top: 0, zIndex: 20 }}>
@@ -223,7 +195,7 @@ export default function FreeAgency() {
           </div>
         </aside>
       </div>
-    </div>
+    </>
   )
 }
 

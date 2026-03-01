@@ -5,6 +5,7 @@ import TankTable from './components/TankTable'
 import TodayGames from './components/TodayGames'
 import JazzPickOdds from './components/JazzPickOdds'
 import LotterySimulator from './components/LotterySimulator'
+import { LayoutConfig } from './components/Layout'
 
 const JAZZ_ID = 1610612762
 
@@ -57,7 +58,6 @@ function useApi(url) {
 
 export default function App() {
   const [gamesDate, setGamesDate] = useState(() => toDateStr(new Date()))
-  const [logoPopped, setLogoPopped] = useState(false)
   const today = toDateStr(new Date())
 
   const standings = useApi('/api/standings')
@@ -73,34 +73,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-
-      {/* Header */}
-      <header style={{ background: 'var(--sch-black)', borderBottom: '3px solid var(--sch-teal-bright)', height: 70, overflow: 'visible' }}
-        className="px-6">
-        <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between">
-          <div className="flex items-center gap-5 h-full">
-            <a href="https://www.saltcityhoops.com" target="_blank" rel="noopener noreferrer">
-              <img
-                src="/sch-logo.svg"
-                alt="Salt City Hoops"
-                style={{
-                  width: 73, height: 64, flexShrink: 0, alignSelf: 'flex-start', marginTop: 19, position: 'relative', zIndex: 1,
-                  animation: logoPopped ? 'logo-pop 0.45s ease-out forwards' : undefined,
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={() => setLogoPopped(true)}
-                onAnimationEnd={() => setLogoPopped(false)}
-              />
-            </a>
-            <div>
-              <h1 className="text-lg sm:text-2xl tracking-tight leading-none text-white whitespace-nowrap"
-                style={{ fontFamily: "'Archivo Black', Arial, sans-serif" }}>
-                Jazz Lottery Watch
-              </h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
+    <>
+      <LayoutConfig
+        title="Jazz Lottery Watch"
+        headerRight={
+          <>
             <span className="hidden sm:inline text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
               Updated {lastUpdated}
             </span>
@@ -112,9 +89,9 @@ export default function App() {
             >
               ↻
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <main className="max-w-[1600px] mx-auto px-4 py-8 space-y-[30px]">
         <section>
@@ -183,7 +160,7 @@ export default function App() {
           style guide
         </Link>
       </footer>
-    </div>
+    </>
   )
 }
 
