@@ -18,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/draft-history" element={<DraftHistory />} />
         </Route>
         <Route path="/style-guide" element={<StyleGuide />} />
+        <Route path="/lottery-watch" element={<Navigate to="/jazz-lottery-watch" replace />} />
         <Route path="/" element={<Navigate to="/jazz-lottery-watch" replace />} />
       </Routes>
     </BrowserRouter>
