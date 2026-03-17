@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { apiUrl } from './lib/api'
 import TankTable from './components/TankTable'
 import TodayGames from './components/TodayGames'
@@ -146,20 +145,6 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="flex max-w-[1600px] mx-auto px-4 py-6 justify-end gap-4">
-        <Link to="/draft-history" className="text-xs" style={{ color: 'var(--border-med)', textDecoration: 'none' }}
-          onMouseEnter={e => e.target.style.color = 'var(--text-faint)'}
-          onMouseLeave={e => e.target.style.color = 'var(--border-med)'}
-        >
-          draft history
-        </Link>
-        <Link to="/style-guide" className="text-xs" style={{ color: 'var(--border-med)', textDecoration: 'none' }}
-          onMouseEnter={e => e.target.style.color = 'var(--text-faint)'}
-          onMouseLeave={e => e.target.style.color = 'var(--border-med)'}
-        >
-          style guide
-        </Link>
-      </footer>
     </>
   )
 }
